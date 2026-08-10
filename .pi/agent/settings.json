@@ -1,0 +1,41 @@
+{
+  "lastChangelogVersion": "0.84.1",
+  "theme": "dark",
+  "packages": [
+    "npm:pi-commandcode-provider@0.5.0",
+    "npm:@ogulcancelik/pi-herdr@0.4.0",
+    "npm:@juicesharp/rpiv-ask-user-question@2.4.0",
+    "npm:@juicesharp/rpiv-todo@2.4.0",
+    "npm:@juicesharp/rpiv-web-tools@2.4.0",
+    "npm:@mrclrchtr/supi-web@4.7.0",
+    "npm:pi-undo-redo@0.1.1",
+    "npm:@duskoide/pi-herdr-worker@1.0.0",
+    "npm:@arvoretech/pi-kiro-provider@0.8.5",
+    "npm:@vigolium/piolium@0.0.13",
+    "npm:pi-alibaba-models@1.0.14",
+    "npm:@upstash/context7-pi@0.1.2",
+    "npm:pi-simplify@0.2.3",
+    "npm:@gotgenes/pi-permission-system@24.0.0",
+    "npm:@narumitw/pi-plan-mode@0.49.3"
+  ],
+  "defaultProvider": "kiro",
+  "defaultModel": "gpt-5-6-luna",
+  "defaultThinkingLevel": "max",
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "defaultProjectTrust": "always",
+  "quietStartup": false,
+  "enabledModels": [
+    "opencode/big-pickle",
+    "opencode/deepseek-v4-flash-free",
+    "opencode/mimo-v2.5-free",
+    "kiro/gpt-5-6-luna",
+    "kiro/claude-opus-5",
+    "openrouter/deepseek/deepseek-v4-flash-0731",
+    "kiro/gpt-5-6-terra",
+    "kiro/gpt-5-6-sol",
+    "alibaba-plan/qwen3.8-max"
+  ],
+  "tuiMode": "fullscreen"
+}

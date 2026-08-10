@@ -1,0 +1,9 @@
+{
+  "limit": 10,
+  "llmCanOverrideLimit": false,
+  "timeoutMs": 15000,
+  "safesearch": 0,
+  "llmCanPickCategory": true,
+  "allowPrivateUrls": false,
+  "verbose": false
+}

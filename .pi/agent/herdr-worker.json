@@ -1,0 +1,10 @@
+{
+  "defaultModel": "opencode/mimo-v2.5-free",
+  "allowedModels": [
+    "deepseek-v4-flash-free",
+    "opencode/mimo-v2.5-free",
+    "openrouter/free"
+  ],
+  "defaultTimeout": 120000,
+  "defaultDirection": "right"
+}
