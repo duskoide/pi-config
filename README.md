@@ -7,7 +7,7 @@ This directory is the source of truth for my Pi setup. It keeps Pi's static conf
 Requirements: Node.js, npm, and Git.
 
 ```bash
-git clone <this-repository-url> ~/pi-config
+git clone https://github.com/duskoide/pi-config.git ~/pi-config
 cd ~/pi-config
 ./install.sh
 pi
