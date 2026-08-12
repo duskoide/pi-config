@@ -16,11 +16,16 @@
     "npm:@upstash/context7-pi@0.1.2",
     "npm:pi-simplify@0.2.3",
     "npm:@gotgenes/pi-permission-system@24.0.0",
-    "npm:@narumitw/pi-plan-mode@0.49.3"
+    "npm:pi-agent-browser-native",
+    "npm:@ogulcancelik/pi-codex-compaction",
+    "npm:@ff-labs/pi-fff",
+    "npm:@xynogen/pix-pretty",
+    "npm:@plannotator/pi-extension",
+    "npm:pi-mcp-adapter"
   ],
-  "defaultProvider": "kiro",
-  "defaultModel": "gpt-5-6-luna",
-  "defaultThinkingLevel": "max",
+  "defaultProvider": "alibaba-plan",
+  "defaultModel": "qwen3.8-max",
+  "defaultThinkingLevel": "high",
   "terminal": {
     "showTerminalProgress": true
   },
