@@ -67,6 +67,18 @@ while IFS= read -r package_source; do
   pi install --no-approve "$package_source" >/dev/null
  done < <(node -e 'for (const source of require(process.argv[1]).packages ?? []) console.log(source)' "$PI_DIR/settings.json")
 
+# Apply pi-config patches to pinned packages (idempotent; re-applied after
+# every pi install above so upgrades never lose them).
+node "$REPO_DIR/patches/patch-pi-permission-system.mjs" "$PI_DIR"
+
+# Register Herdr's pi integration (agent state reporting) when Herdr is
+# available. It installs a Herdr-managed extension into $PI_DIR/extensions.
+if command -v herdr >/dev/null 2>&1; then
+  herdr integration install pi >/dev/null 2>&1 \
+    && log "installed Herdr pi integration" \
+    || log "warning: Herdr pi integration install failed"
+fi
+
 log "checking Pi configuration"
 node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); JSON.parse(require("fs").readFileSync(process.argv[2], "utf8"));' \
   "$PI_DIR/settings.json" "$REPO_DIR/pi-herdr-worker/package.json"
