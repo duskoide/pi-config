@@ -1,10 +1,10 @@
-# Portable Pi configuration
+# Portable Pi + Herdr configuration
 
-This directory is the source of truth for my Pi setup. It keeps Pi's static configuration and custom resources in Git while leaving credentials and machine runtime data local.
+This directory is the source of truth for my Pi and Herdr setup. It keeps both tools' static configuration and custom resources in Git while leaving credentials and machine runtime data local.
 
 ## New machine
 
-Requirements: Node.js, npm, and Git.
+Requirements: Node.js, npm, curl, and Git.
 
 ```bash
 git clone https://github.com/duskoide/pi-config.git ~/pi-config
@@ -13,14 +13,19 @@ cd ~/pi-config
 pi
 ```
 
-The installer pins Pi to `0.84.1`, links the checked-in static files into `~/.pi/agent`, installs the local Herdr worker package dependency from its lockfile, and validates the JSON configuration.
+The installer:
 
-It is safe to run repeatedly. Existing files are moved to a timestamped `.pre-pi-config.*` backup before a link is created. The installer never links or copies `auth.json`, sessions, caches, model catalogs, state, or logs.
+- pins Pi to `0.84.1`
+- installs Herdr via its official installer (`https://herdr.dev/install.sh`) when `herdr` is not already on `PATH` (latest stable; the installer does not support pinning)
+- links the checked-in Pi files into `~/.pi/agent` and `herdr/config.toml` into `~/.config/herdr/config.toml`
+- installs the local Herdr worker package dependency from its lockfile, installs Herdr's Pi integration when Herdr is present, and validates the configuration
 
-If the machine uses a non-default Pi config directory, set `PI_CODING_AGENT_DIR` before running the installer:
+It is safe to run repeatedly. Existing files (including symlinks managed by other tools such as home-manager) are moved to a timestamped `.pre-config.*` backup before a link is created. The installer never links or copies `auth.json`, sessions, caches, model catalogs, state, or logs.
+
+Overrides before running the installer:
 
 ```bash
-PI_CODING_AGENT_DIR="$HOME/.config/pi" ./install.sh
+PI_CODING_AGENT_DIR="$HOME/.config/pi" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
 ```
 
 ## Credentials
@@ -37,6 +42,7 @@ The credential file on the source machine contained live-looking API/OAuth token
 
 ## What is portable
 
+- `herdr/config.toml`: keybindings, theme, and UI settings for Herdr
 - `settings.json`, append-system instructions, and agent definitions
 - custom extensions, including the Macaron provider and PDF-to-Markdown tool
 - checked-in skills (`find-skills` and the Herdr operating instructions)
@@ -48,6 +54,7 @@ Installed npm Pi packages are referenced by exact version in settings and are fe
 ## What stays local
 
 - `auth.json` and OAuth refresh/access tokens
+- Herdr's runtime data under `~/.config/herdr` (sockets, logs, `session.json`, plugin locks)
 - sessions, daily memory, caches, model catalogs, failover state, logs, and generated stores
 - `node_modules` and Python virtual environments
 - project trust decisions, which are machine-specific
@@ -56,6 +63,6 @@ The repo's `.gitignore` protects these categories. Pi itself may still create th
 
 ## Updating the setup
 
-When changing Pi resources, edit the checked-in files under `.pi/agent`, then run `./install.sh` and restart Pi (or use `/reload`). When adding a third-party package, pin its version in `.pi/agent/settings.json` and update the installed package on the source machine before testing.
+When changing Pi resources, edit the checked-in files under `.pi/agent`, then run `./install.sh` and restart Pi (or use `/reload`). For Herdr, edit `herdr/config.toml` in the repo and run `herdr server reload-config`. When adding a third-party package, pin its version in `.pi/agent/settings.json` and update the installed package on the source machine before testing.
 
 Review extensions and skills before enabling them: Pi packages and extensions execute with the permissions of the current user.

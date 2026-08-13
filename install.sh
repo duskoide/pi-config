@@ -1,25 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Install and activate the checked-in Pi configuration without replacing
-# credentials, sessions, caches, or other runtime data.
+# Install Pi and Herdr and activate the checked-in configuration for both
+# without replacing credentials, sessions, caches, or other runtime data.
 
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PI_DIR="${PI_CODING_AGENT_DIR:-${HOME}/.pi/agent}"
 PI_VERSION="0.84.1"
+HERDR_CONFIG_DIR="${HERDR_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/herdr}"
 
-log() { printf 'pi-config: %s\n' "$*"; }
-fail() { printf 'pi-config: error: %s\n' "$*" >&2; exit 1; }
+log() { printf 'config: %s\n' "$*"; }
+fail() { printf 'config: error: %s\n' "$*" >&2; exit 1; }
 
 command -v node >/dev/null 2>&1 || fail "Node.js is required"
 command -v npm >/dev/null 2>&1 || fail "npm is required"
+
+# --- Pi -------------------------------------------------------------------
 
 if ! command -v pi >/dev/null 2>&1 || [[ "$(pi --version 2>/dev/null || true)" != "$PI_VERSION" ]]; then
   log "installing Pi ${PI_VERSION}"
   npm install --global --ignore-scripts "@earendil-works/pi-coding-agent@${PI_VERSION}"
 fi
 
+# --- Herdr ----------------------------------------------------------------
+
+# The official installer always installs the latest stable release (version
+# pinning is not supported). If herdr is already on PATH, keep it as-is.
+if ! command -v herdr >/dev/null 2>&1; then
+  log "installing Herdr"
+  command -v curl >/dev/null 2>&1 || fail "curl is required to install Herdr"
+  curl -fsSL https://herdr.dev/install.sh | sh
+  command -v herdr >/dev/null 2>&1 || log "warning: herdr installed to a directory not on PATH (check ~/.local/bin)"
+fi
+if command -v herdr >/dev/null 2>&1; then
+  log "herdr $(herdr --version 2>/dev/null | head -n1 | awk '{print $2}')"
+fi
+
+# Link the checked-in Herdr config. Existing files or symlinks (including
+# home-manager-managed ones) are moved to a timestamped backup first; the
+# repo copy becomes the source of truth.
+mkdir -p "$HERDR_CONFIG_DIR"
+if [[ -f "$REPO_DIR/herdr/config.toml" ]]; then
+  herdr_config="$HERDR_CONFIG_DIR/config.toml"
+  if [[ -L "$herdr_config" && "$(readlink -f -- "$herdr_config" 2>/dev/null || true)" == "$REPO_DIR/herdr/config.toml" ]]; then
+    :
+  else
+    if [[ -e "$herdr_config" || -L "$herdr_config" ]]; then
+      backup="${herdr_config}.pre-config.$(date +%Y%m%d%H%M%S)"
+      mv -- "$herdr_config" "$backup"
+      log "moved existing herdr config.toml to ${backup##*/}"
+    fi
+    ln -s -- "$REPO_DIR/herdr/config.toml" "$herdr_config"
+  fi
+  # Hot-reload into a running server when possible.
+  herdr server reload-config >/dev/null 2>&1 || true
+fi
+
 mkdir -p "$PI_DIR"
+
+# --- Pi static configuration ----------------------------------------------
 
 link_static() {
   local source="$1"
@@ -31,7 +70,7 @@ link_static() {
     return
   fi
   if [[ -e "$destination" || -L "$destination" ]]; then
-    local backup="${destination}.pre-pi-config.$(date +%Y%m%d%H%M%S)"
+    local backup="${destination}.pre-config.$(date +%Y%m%d%H%M%S)"
     mv -- "$destination" "$backup"
     log "moved existing ${relative} to ${backup##*/}"
   fi
