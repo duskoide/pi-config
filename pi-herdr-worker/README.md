@@ -1,6 +1,6 @@
 # pi-herdr-worker
 
-Spawn worker [pi](https://pi.dev) agents in isolated [Herdr](https://github.com/ogulcancelik/herdr) panes for delegated task execution. The primary agent acts as orchestrator, delegating work to isolated workers.
+Spawn worker [pi](https://pi.dev) agents in isolated [Herdr](https://github.com/ogulcancelik/herdr) tabs for delegated task execution. The primary agent acts as orchestrator, delegating work to isolated workers.
 
 ## Install
 
@@ -27,7 +27,7 @@ pi install npm:@duskoide/pi-herdr-worker
 
 ```bash
 /worker Implement the login page
-/worker Review code worker-review claude-sonnet-5
+/worker Review code worker-review gpt-5-6-luna
 /workerp Run the linter and fix errors
 /workerlist
 /workerkill worker-test-runner
@@ -39,7 +39,7 @@ pi install npm:@duskoide/pi-herdr-worker
 spawn_worker({
   prompt: "Run tests and report any failures",
   name: "worker-tests",
-  model: "gpt-4o",
+  model: "gpt-5-6-luna",
   timeout: 180000,
   direction: "right"
 })
@@ -49,7 +49,7 @@ spawn_worker({
 |-----------|------|---------|-------------|
 | `prompt` | string | required | The task to send to the worker |
 | `name` | string | auto-generated | Unique worker name (lowercase, hyphens, max 31 chars) |
-| `model` | string | from settings | Model ID (e.g. `gpt-4o`, `claude-sonnet-5`) |
+| `model` | string | from settings | Model ID, launched through the Kiro provider at maximum thinking |
 | `timeout` | number | `120000` | Timeout in milliseconds |
 | `direction` | `"right"` \| `"down"` | `"right"` | Pane split direction |
 
@@ -59,8 +59,8 @@ Configuration lives at `~/.pi/agent/herdr-worker.json`:
 
 ```json
 {
-  "defaultModel": "claude-sonnet-5",
-  "allowedModels": ["gpt-4o", "claude-sonnet-5", "claude-sonnet-4-5", "gpt-4o-mini"],
+  "defaultModel": "gpt-5-6-luna",
+  "allowedModels": ["gpt-5-6-luna"],
   "defaultTimeout": 120000,
   "defaultDirection": "right"
 }
@@ -68,11 +68,11 @@ Configuration lives at `~/.pi/agent/herdr-worker.json`:
 
 ## How It Works
 
-1. Splits the current pane for an isolated terminal
-2. Launches a pi worker with the chosen model
+1. Creates a new isolated Herdr tab
+2. Launches a pi worker in the tab's root pane using Kiro's `gpt-5-6-luna` model at maximum thinking
 3. Submits the task and waits for completion
 4. Reads the worker's output
-5. Closes the pane and stops the worker automatically
+5. Closes the tab and stops the worker automatically
 
 ## License
 

@@ -16,8 +16,8 @@ interface WorkerSettings {
 // Load settings from JSON file
 function loadSettings(): WorkerSettings {
   const defaults: WorkerSettings = {
-    defaultModel: "claude-sonnet-5",
-    allowedModels: ["gpt-4o", "claude-sonnet-5", "claude-sonnet-4-5", "gpt-4o-mini"],
+    defaultModel: "gpt-5-6-luna",
+    allowedModels: ["gpt-5-6-luna"],
     defaultTimeout: 120000,
     defaultDirection: "right",
   };
@@ -131,21 +131,22 @@ export default function herdrWorker() {
           try {
             const { execSync } = require("child_process");
 
-            // Create new pane
-            const splitResult = execSync(
-              `herdr pane split --current --direction ${settings.defaultDirection} --cwd "${process.env.PWD}" --no-focus`,
+            // Create an isolated tab and use its root pane for the worker.
+            const tabResult = execSync(
+              `herdr tab create --cwd "${process.env.PWD}" --no-focus --label "worker-${workerName}"`,
               { encoding: "utf-8" }
             );
-            const split = JSON.parse(splitResult);
-            const newPaneId = split.result?.pane?.pane_id;
+            const createdTab = JSON.parse(tabResult);
+            const workerTabId = createdTab.result?.tab?.tab_id;
+            const newPaneId = createdTab.result?.root_pane?.pane_id;
 
-            if (!newPaneId) {
-              return { error: "Could not create new pane" };
+            if (!workerTabId || !newPaneId) {
+              return { error: "Could not create worker tab" };
             }
 
-            // Build start command with model (from arg or settings default)
+            // Build start command with the Kiro model and maximum thinking.
             const effectiveModel = model || settings.defaultModel;
-            let startCmd = `herdr agent start "${workerName}" --kind pi --pane "${newPaneId}" -- --model "${effectiveModel}"`;
+            const startCmd = `herdr agent start "${workerName}" --kind pi --pane "${newPaneId}" -- --provider "kiro" --model "${effectiveModel}" --thinking "max"`;
 
             // Start worker
             execSync(startCmd, { encoding: "utf-8" });
@@ -163,13 +164,13 @@ export default function herdrWorker() {
               { encoding: "utf-8" }
             );
 
-            // Cleanup
-            execSync(`herdr pane close "${newPaneId}" 2>/dev/null || true`, {
+            // Cleanup the entire worker tab (this also stops the worker).
+            execSync(`herdr tab close "${workerTabId}" 2>/dev/null || true`, {
               encoding: "utf-8",
             });
 
             return {
-              message: `✅ Worker "${workerName}" (model: ${effectiveModel}) completed in pane ${newPaneId}\n\n${response}`,
+              message: `✅ Worker "${workerName}" (kiro/${effectiveModel}, thinking: max) completed in tab ${workerTabId}, pane ${newPaneId}\n\n${response}`,
             };
           } catch (error: any) {
             return { error: `Failed: ${error.message}` };
@@ -297,35 +298,28 @@ export default function herdrWorker() {
             };
           }
 
+          let workerTabId: string | undefined;
+
           try {
-            // Get current pane context
-            const currentResult = await execCommand(
-              "herdr pane current --current"
+            // Create an isolated tab and use its root pane for the worker.
+            const tabResult = await execCommand(
+              `herdr tab create --cwd "${process.env.PWD}" --no-focus --label "worker-${workerName}"`
             );
-            const current = JSON.parse(currentResult);
-            const currentPaneId = current.result?.pane?.pane_id;
+            const createdTab = JSON.parse(tabResult);
+            workerTabId = createdTab.result?.tab?.tab_id;
+            const newPaneId = createdTab.result?.root_pane?.pane_id;
 
-            if (!currentPaneId) {
-              return { error: "Could not get current pane ID" };
+            if (!workerTabId || !newPaneId) {
+              return { error: "Could not create worker tab" };
             }
 
-            // Create new pane
-            const splitResult = await execCommand(
-              `herdr pane split --current --direction ${direction} --cwd "${process.env.PWD}" --no-focus`
-            );
-            const split = JSON.parse(splitResult);
-            const newPaneId = split.result?.pane?.pane_id;
-
-            if (!newPaneId) {
-              return { error: "Could not create new pane" };
-            }
-
-            // Start worker agent with specified model
-            const startCmd = `herdr agent start "${workerName}" --kind pi --pane "${newPaneId}" -- --model "${model}"`;
+            // Start the worker with Kiro's GPT-5.6 Luna model at maximum thinking.
+            const startCmd = `herdr agent start "${workerName}" --kind pi --pane "${newPaneId}" -- --provider "kiro" --model "${model}" --thinking "max"`;
             const startResult = await execCommand(startCmd);
             const start = JSON.parse(startResult);
 
             if (!start.result?.agent?.agent_status) {
+              await execCommand(`herdr tab close "${workerTabId}" 2>/dev/null || true`);
               return { error: "Failed to start worker" };
             }
 
@@ -337,27 +331,32 @@ export default function herdrWorker() {
             const promptRes = JSON.parse(promptResult);
 
             if (promptRes.type !== "agent_prompted") {
-              // Cleanup on failure
-              await execCommand(`herdr pane close "${newPaneId}" 2>/dev/null || true`);
+              await execCommand(`herdr tab close "${workerTabId}" 2>/dev/null || true`);
               return { error: "Failed to send prompt to worker" };
             }
 
-            // Read response
+            // Read response before closing the worker tab.
             const readResult = await execCommand(
               `herdr agent read "${workerName}" --source recent-unwrapped --lines 100`
             );
 
-            // Cleanup: close the pane
-            await execCommand(`herdr pane close "${newPaneId}" 2>/dev/null || true`);
+            // Cleanup: close the entire tab (this also stops the worker).
+            await execCommand(`herdr tab close "${workerTabId}" 2>/dev/null || true`);
 
             return {
+              tab_id: workerTabId,
               pane_id: newPaneId,
               worker_name: workerName,
+              provider: "kiro",
               model: model,
+              thinking: "max",
               status: "completed",
               response: readResult,
             };
           } catch (error: any) {
+            if (workerTabId) {
+              await execCommand(`herdr tab close "${workerTabId}" 2>/dev/null || true`).catch(() => {});
+            }
             return {
               error: `Failed to spawn worker: ${error.message}`,
             };

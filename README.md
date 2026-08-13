@@ -17,7 +17,7 @@ The installer:
 
 - pins Pi to `0.84.1`
 - installs Herdr via its official installer (`https://herdr.dev/install.sh`) when `herdr` is not already on `PATH` (latest stable; the installer does not support pinning)
-- links the checked-in Pi files into `~/.pi/agent` and `herdr/config.toml` into `~/.config/herdr/config.toml`
+- links the checked-in Pi files into `~/.pi/agent`, the top-level Pi files (including `web-search.json`) into `~/.pi`, and `herdr/config.toml` into `~/.config/herdr/config.toml`
 - installs the local Herdr worker package dependency from its lockfile, installs Herdr's Pi integration when Herdr is present, and validates the configuration
 
 It is safe to run repeatedly. Existing files (including symlinks managed by other tools such as home-manager) are moved to a timestamped `.pre-config.*` backup before a link is created. The installer never links or copies `auth.json`, sessions, caches, model catalogs, state, or logs.
@@ -25,7 +25,7 @@ It is safe to run repeatedly. Existing files (including symlinks managed by othe
 Overrides before running the installer:
 
 ```bash
-PI_CODING_AGENT_DIR="$HOME/.config/pi" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
+PI_CODING_AGENT_DIR="$HOME/.config/pi" PI_HOME_DIR="$HOME/.config" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
 ```
 
 ## Credentials

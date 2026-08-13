@@ -57,13 +57,22 @@ if [[ -f "$REPO_DIR/herdr/config.toml" ]]; then
 fi
 
 mkdir -p "$PI_DIR"
+PI_HOME_DIR="${PI_HOME_DIR:-${HOME}/.pi}"
 
 # --- Pi static configuration ----------------------------------------------
 
+# Link every static file under repo/.pi while preserving Pi's layout. Agent
+# files use PI_CODING_AGENT_DIR; top-level files such as web-search.json use
+# PI_HOME_DIR (default ~/.pi).
 link_static() {
   local source="$1"
-  local relative="${source#"$REPO_DIR/.pi/agent/"}"
-  local destination="$PI_DIR/$relative"
+  local relative="${source#"$REPO_DIR/.pi/"}"
+  local destination
+  if [[ "$relative" == agent/* ]]; then
+    destination="$PI_DIR/${relative#agent/}"
+  else
+    destination="$PI_HOME_DIR/$relative"
+  fi
   mkdir -p "$(dirname -- "$destination")"
 
   if [[ -L "$destination" && "$(readlink -f -- "$destination" 2>/dev/null || true)" == "$source" ]]; then
@@ -80,7 +89,7 @@ link_static() {
 while IFS= read -r -d '' source; do
   link_static "$source"
 done < <(
-  find "$REPO_DIR/.pi/agent" -type f \
+  find "$REPO_DIR/.pi" -type f \
     ! -path '*/node_modules/*' \
     ! -name '*.cache.json' \
     ! -name 'auth.json' \

@@ -20,8 +20,8 @@ Worker configuration is read from `~/.pi/agent/herdr-worker.json`:
 
 ```json
 {
-  "defaultModel": "claude-sonnet-5",
-  "allowedModels": ["gpt-4o", "claude-sonnet-5", "claude-sonnet-4-5", "gpt-4o-mini"],
+  "defaultModel": "gpt-5-6-luna",
+  "allowedModels": ["gpt-5-6-luna"],
   "defaultTimeout": 120000,
   "defaultDirection": "right"
 }
