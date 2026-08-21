@@ -15,7 +15,7 @@ pi
 
 The installer:
 
-- pins Pi to `0.84.2`
+- installs the latest stable Pi release by default; set `PI_VERSION` to request an exact version
 - installs Herdr via its official installer (`https://herdr.dev/install.sh`) when `herdr` is not already on `PATH` (latest stable; the installer does not support pinning)
 - links the checked-in Pi files into `~/.pi/agent`, the top-level Pi files (including `web-search.json`) into `~/.pi`, and `herdr/config.toml` into `~/.config/herdr/config.toml`
 - installs pinned Pi packages, installs Herdr's Pi integration when Herdr is present, and validates the configuration
@@ -25,8 +25,10 @@ It is safe to run repeatedly. Existing files (including symlinks managed by othe
 Overrides before running the installer:
 
 ```bash
-PI_CODING_AGENT_DIR="$HOME/.config/pi" PI_HOME_DIR="$HOME/.config" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
+PI_VERSION="0.84.2" PI_CODING_AGENT_DIR="$HOME/.config/pi" PI_HOME_DIR="$HOME/.config" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
 ```
+
+`PI_VERSION` defaults to the npm `latest` tag. Set it to an exact version only when you intentionally need a reproducible install or rollback.
 
 ## Credentials
 

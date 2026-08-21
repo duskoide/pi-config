@@ -6,7 +6,8 @@ set -euo pipefail
 
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PI_DIR="${PI_CODING_AGENT_DIR:-${HOME}/.pi/agent}"
-PI_VERSION="0.84.2"
+PI_VERSION="${PI_VERSION:-latest}"
+PI_PACKAGE="@earendil-works/pi-coding-agent"
 HERDR_CONFIG_DIR="${HERDR_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/herdr}"
 
 log() { printf 'config: %s\n' "$*"; }
@@ -17,9 +18,14 @@ command -v npm >/dev/null 2>&1 || fail "npm is required"
 
 # --- Pi -------------------------------------------------------------------
 
-if ! command -v pi >/dev/null 2>&1 || [[ "$(pi --version 2>/dev/null || true)" != "$PI_VERSION" ]]; then
-  log "installing Pi ${PI_VERSION}"
-  npm install --global --ignore-scripts "@earendil-works/pi-coding-agent@${PI_VERSION}"
+# Follow the current stable release by default. Set PI_VERSION to an exact
+# version when a reproducible or rollback install is needed.
+desired_pi_version="$(npm view "${PI_PACKAGE}@${PI_VERSION}" version)"
+[[ -n "$desired_pi_version" ]] || fail "could not resolve Pi version: ${PI_VERSION}"
+installed_pi_version="$(pi --version 2>/dev/null || true)"
+if [[ "$installed_pi_version" != "$desired_pi_version" ]]; then
+  log "installing Pi ${desired_pi_version} (${PI_VERSION})"
+  npm install --global --ignore-scripts "${PI_PACKAGE}@${desired_pi_version}"
 fi
 
 # --- Herdr ----------------------------------------------------------------
