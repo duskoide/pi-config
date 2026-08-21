@@ -2,45 +2,38 @@
 
 ## Worker Delegation with herdr-worker
 
-Delegate work to isolated **herdr-worker** pi agents running in their own Herdr tabs. You act as the orchestrator: spawn workers, send prompts, wait, read results, and clean up.
+For non-trivial work, use the installed `pi-herdr-worker` extension as the execution boundary: this session becomes the brain/orchestrator and delegates to one persistent worker in a dedicated Herdr tab. The agent can switch modes itself with the `worker_mode` tool; the user does not need to run slash commands. `worker_delegate` also enters brain mode automatically when needed.
 
-**Read the `herdr-worker` skill before your first worker in a session** — it defines the exact workflow (tab creation, `herdr agent start` with `--model`, prompting, reading output, tab cleanup) and the mandatory rules (always pass `--model` from `~/.pi/agent/herdr-worker.json`, always use a new tab with `--no-focus`, unique lowercase hyphenated worker names).
+**Read the `herdr-worker` skill before the first delegation in a session.** Worker defaults come from `~/.pi/agent/herdr-worker.json` and are enforced by the extension. Each delegation must select an explicit role and include a complete objective, relevant files, constraints, and validation commands.
 
 ### When to Delegate vs Direct Execution
-- **Delegate to a worker** when: the task is self-contained, benefits from isolation, is long-running, or can run in parallel with other tasks.
-- **Execute directly** when: the task is a quick single-step action, needs tight integration with the current context, or requires interactive back-and-forth with the user.
+- **Delegate** self-contained, multi-step, long-running, implementation, testing, review, refactoring, or broad research tasks.
+- **Execute directly** only quick single-step work that needs tight integration with the current conversation.
 
-### Worker Roles (naming convention)
-Map tasks to descriptively named workers:
-- Research / exploration, "how does X work" → `worker-explore`
-- Planning, architecture, multi-step design → `worker-plan`
-- Discrete implementation from a clear spec → `worker-impl`
-- Writing tests / TDD → `worker-test`
-- Review & QA, correctness checks → `worker-review`
-- Refactors, simplification → `worker-simplify`
+### Worker roles
+Use the `worker_delegate.role` field:
+- `explore` — read-only codebase or external research
+- `plan` — read-only architecture and executable planning
+- `impl` — implementation and relevant validation
+- `test` — testing and failure diagnosis
+- `review` — read-only correctness/security/regression review
+- `simplify` — read-only complexity review
+- `general` — coherent work that does not fit another role
 
-Run independent tasks as **parallel workers** (one tab each); chain dependent tasks as **sequential workers**, feeding one worker's output into the next.
+The persistent worker is serialized and re-used across phases. Independent parallel work may use temporary `spawn_pi` agents; these also use dedicated Herdr tabs and the configured default model, but share the same checkout, so never run concurrent mutations against the same files.
 
-### Orchestrate multi-phase work as a pipeline
-For non-trivial requests, prefer: `worker-plan` → `worker-impl` → `worker-test` → `worker-review`. Track progress with `todo` and mark each phase as you go.
+### Preferred pipeline
+For non-trivial changes, prefer:
 
-## Delegate Early and Freely
+`plan → impl → test → review`
 
-Lean toward worker delegation by default. When in doubt, spawn a worker rather than doing everything inline. Strong delegation triggers (delegate these proactively):
-
-- **Research / exploration**: codebase surveys, library lookups → `worker-explore`
-- **Planning**: multi-step design, "plan how to build X" → `worker-plan`
-- **Discrete implementation** from a clear spec → `worker-impl`
-- **Tests**: writing failing tests / TDD → `worker-test`
-- **Review & QA**: risk analysis, correctness checks → `worker-review`
-- **Parallelizable work**: independent subtasks → spawn multiple workers at once
-- **Long or context-heavy work** that would bloat the main conversation → isolate in a worker
+Skip a phase only when it is genuinely inapplicable. Track progress with `todo`, keep exactly one task in progress, and use worker reports as evidence rather than assuming success.
 
 ## Execution Mode Gate
 
-After a plan or todo list is approved by the user — and BEFORE executing any of it — always ask the user which mode to use (via the ask_user_question tool):
+After a non-trivial plan or todo list is approved, ask the user which execution mode to use:
 
-- **Worker-driven (Recommended)** — delegate the ENTIRE approved plan to herdr-workers: you orchestrate, workers execute. Do not execute the plan yourself.
-- **Inline execution** — you do the work directly in the main thread.
+- **Worker-driven (Recommended)** — call `worker_mode({ action: "brain" })` or directly call `worker_delegate`; execute the entire approved plan through the persistent worker. Do not implement inline.
+- **Inline execution** — remain in regular mode and do the work directly.
 
-Do not start executing an approved plan or todo list until the user picks a mode. This gate applies to multi-step or non-trivial plans; a trivial single-step action needs no gate.
+The user never needs to enter `/worker-config mode brain`. When worker-driven execution is complete, call `worker_mode({ action: "regular" })` to restore direct work and close the persistent worker.

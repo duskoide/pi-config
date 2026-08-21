@@ -15,10 +15,10 @@ pi
 
 The installer:
 
-- pins Pi to `0.84.1`
+- pins Pi to `0.84.2`
 - installs Herdr via its official installer (`https://herdr.dev/install.sh`) when `herdr` is not already on `PATH` (latest stable; the installer does not support pinning)
 - links the checked-in Pi files into `~/.pi/agent`, the top-level Pi files (including `web-search.json`) into `~/.pi`, and `herdr/config.toml` into `~/.config/herdr/config.toml`
-- installs the local Herdr worker package dependency from its lockfile, installs Herdr's Pi integration when Herdr is present, and validates the configuration
+- installs pinned Pi packages, installs Herdr's Pi integration when Herdr is present, and validates the configuration
 
 It is safe to run repeatedly. Existing files (including symlinks managed by other tools such as home-manager) are moved to a timestamped `.pre-config.*` backup before a link is created. The installer never links or copies `auth.json`, sessions, caches, model catalogs, state, or logs.
 
@@ -47,7 +47,7 @@ The credential file on the source machine contained live-looking API/OAuth token
 - custom extensions, including the Macaron provider and PDF-to-Markdown tool
 - checked-in skills (`find-skills` and the Herdr operating instructions)
 - provider/package settings that do not contain tokens
-- exact package versions in `settings.json` and `pi-herdr-worker/package-lock.json`
+- exact package versions in `settings.json` and the embedded `pi-herdr-worker` source
 
 Installed npm Pi packages are referenced by exact version in settings and are fetched into Pi's local package cache on the new machine. Their source code remains outside this repository.
 

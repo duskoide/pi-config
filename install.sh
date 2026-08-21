@@ -6,7 +6,7 @@ set -euo pipefail
 
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PI_DIR="${PI_CODING_AGENT_DIR:-${HOME}/.pi/agent}"
-PI_VERSION="0.84.1"
+PI_VERSION="0.84.2"
 HERDR_CONFIG_DIR="${HERDR_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/herdr}"
 
 log() { printf 'config: %s\n' "$*"; }
@@ -98,10 +98,8 @@ done < <(
     -print0
 )
 
-# Install the local package's runtime dependency from its lockfile.
-if [[ -f "$REPO_DIR/pi-herdr-worker/package-lock.json" ]]; then
-  npm ci --omit=dev --prefix "$REPO_DIR/pi-herdr-worker" >/dev/null
-fi
+# The embedded pi-herdr-worker package has no third-party runtime install step;
+# Pi supplies its declared peer dependencies.
 
 export PI_CODING_AGENT_DIR="$PI_DIR"
 

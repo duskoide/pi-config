@@ -1,31 +1,20 @@
 {
-  "name": "@duskoide/pi-herdr-worker",
+  "name": "pi-herdr-worker",
   "version": "1.0.0",
-  "description": "Spawn worker pi agents in isolated Herdr panes for delegated task execution.",
-  "keywords": ["pi-package", "pi", "herdr", "agent", "orchestration"],
-  "license": "MIT",
+  "description": "Spawn pi agents in isolated Herdr panes for parallel task execution",
+  "keywords": ["pi-package", "herdr", "agent", "spawn", "parallel", "multiplexer"],
   "author": "duskoide",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/duskoide/dotfiles.git",
-    "directory": "pi/pi-herdr-worker"
-  },
-  "homepage": "https://github.com/duskoide/dotfiles/tree/main/pi/pi-herdr-worker",
-  "bugs": {
-    "url": "https://github.com/duskoide/dotfiles/issues"
-  },
-  "files": [
-    "extensions",
-    "skills"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "zod": "^4.4.3"
+    "url": "https://github.com/duskoide/pi-herdr-worker"
   },
   "pi": {
-    "extensions": ["./extensions"],
-    "skills": ["./skills"]
+    "skills": ["./skills"],
+    "extensions": ["./extensions"]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
   }
 }

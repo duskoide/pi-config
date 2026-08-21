@@ -1,78 +1,142 @@
 # pi-herdr-worker
 
-Spawn worker [pi](https://pi.dev) agents in isolated [Herdr](https://github.com/ogulcancelik/herdr) tabs for delegated task execution. The primary agent acts as orchestrator, delegating work to isolated workers.
+Spawn pi agents in isolated Herdr panes, or run pi as an orchestrator that delegates implementation work to one persistent worker in its own tab.
 
-## Install
-
-```bash
-pi install npm:@duskoide/pi-herdr-worker
-```
-
-## Requirements
-
-- pi must be running inside a Herdr-managed pane (`HERDR_ENV=1`)
-- Herdr must be installed and running
-- Settings file at `~/.pi/agent/herdr-worker.json` (optional — sensible defaults are built in)
-
-## Slash Commands
-
-| Command | Usage | Description |
-|---------|-------|-------------|
-| `/worker` | `/worker <prompt> [name] [model] [timeout]` | Spawn worker with full control |
-| `/workerp` | `/workerp <prompt> [model]` | Quick spawn with auto-generated name |
-| `/workerlist` | `/workerlist` | List all running workers |
-| `/workerkill` | `/workerkill <name>` | Kill a specific worker |
-
-### Examples
+## Installation
 
 ```bash
-/worker Implement the login page
-/worker Review code worker-review gpt-5-6-luna
-/workerp Run the linter and fix errors
-/workerlist
-/workerkill worker-test-runner
+pi install npm:pi-herdr-worker
 ```
 
-## The `spawn_worker` Tool
+Or via git:
 
-```ts
-spawn_worker({
+```bash
+pi install git:github.com/duskoide/pi-herdr-worker
+```
+
+Pi starts in **regular mode** for every session. Brain mode is session-only: it never persists across restarts, reloads, or session switches. The agent can enter or leave brain mode itself with the `worker_mode` tool; users do not need to run a slash command. Calling `worker_delegate` while regular also enters brain mode automatically.
+
+Worker defaults are loaded from `~/.pi/agent/herdr-worker.json`:
+
+```json
+{
+  "defaultModel": "kiro/gpt-5-6-luna",
+  "allowedModels": ["kiro/gpt-5-6-luna"],
+  "defaultThinking": "max",
+  "defaultTimeout": 300000
+}
+```
+
+These defaults apply to persistent and temporary workers. `/worker-config` remains available for session-only overrides, and worker-model overrides are constrained by `allowedModels`.
+
+## Brain mode
+
+Brain mode switches the **current session into the brain (orchestrator) role** and pairs it with one spawned worker:
+
+- **Brain** — the current pi session, after it changes role. It plans, delegates, inspects results, and reports to the user. It does not do implementation work itself.
+- **Worker** — one persistent pi instance spawned in a new Herdr tab. It performs implementation, testing, reviews, and other non-trivial work.
+
+Enable and configure it with the interactive settings UI or one-line subcommands.
+
+Run `/worker-config` with no arguments to open the settings UI — an interactive panel where you can:
+
+- Toggle **Mode** between `regular` and `brain` (Enter cycles).
+- Pick the **Brain model** and **Worker model** from a searchable list of available models (Enter opens the picker; start typing to filter by name, backspace to edit; the worker model can inherit the brain model).
+- Set the **Brain thinking** and **Worker thinking** levels from a picker.
+- **Reset overrides** back to inheriting the current session's model/thinking.
+
+The panel edits a **draft** — nothing is applied while you navigate. A status line shows `● unsaved changes` once you edit anything. Press **Ctrl+S** to save: the extension then switches the session model/mode and, if needed, reloads the worker with the new settings. Press **Esc** to discard the draft and close without changes. Use ↑↓ to navigate and Enter to cycle or open a picker.
+
+The one-line subcommands remain available (useful for scripting and quick tweaks; these apply immediately):
+
+```text
+/worker-config              # open the settings UI
+/worker-config ui           # open the settings UI
+/worker-config show
+/worker-config mode brain
+/worker-config brain-model anthropic/claude-sonnet-4-5
+/worker-config brain-thinking high
+/worker-config worker-model openai/gpt-4o
+/worker-config worker-thinking medium
+```
+
+`/worker-config mode brain` changes the current session's role to brain and spawns the worker in a new Herdr tab. The agent can do the same with `worker_mode({ action: "brain" })`, and `worker_delegate` does it automatically if needed. Delegations reuse that worker and are serialized so tasks cannot race over the same checkout. The brain receives an explicit orchestrator system instruction; only a small coordination/read-only tool allowlist remains active, and all other tool calls are blocked. Use the `role` field to select `explore`, `plan`, `impl`, `test`, `review`, `simplify`, or `general`. The worker returns its report to the brain, which can then decide the next delegation.
+
+Delegate and close the worker (agent + Herdr tab) in one step by passing `closeAfter: true`:
+
+```text
+worker_delegate({
+  role: "test",
+  prompt: "Run the full test suite and report failures",
+  closeAfter: true
+})
+```
+
+Close the worker on demand while staying in brain mode (the next delegation spawns a fresh worker):
+
+```text
+/worker-config close
+```
+
+The agent can return to direct work without asking the user to type a command:
+
+```text
+worker_mode({ action: "regular" })
+```
+
+The equivalent manual command is:
+
+```text
+/worker-config mode regular
+```
+
+This closes the persistent worker and its Herdr tab. The worker is also closed during session shutdown. If Pi is not running inside Herdr (`HERDR_ENV=1`), brain mode reports an error and remains disabled.
+
+## Temporary spawn commands
+
+These commands remain available in both modes for short-lived, independent tasks:
+
+```text
+/spawn Run tests and report failures
+/spawn Review code pi-reviewer claude-sonnet-5
+/spawnp Run the linter and fix errors
+/spawnlist
+/spawnkill pi-test-runner
+```
+
+`spawn_pi` is also available as a tool. It is an independent one-shot agent and does not use the persistent session overrides from `/worker-config`; it does use `herdr-worker.json` defaults unless `model` or `timeout` is provided explicitly. It runs in a dedicated temporary tab.
+
+```text
+spawn_pi({
   prompt: "Run tests and report any failures",
-  name: "worker-tests",
-  model: "gpt-5-6-luna",
+  name: "pi-test-runner",
+  model: "gpt-4o",
   timeout: 180000,
   direction: "right"
 })
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `prompt` | string | required | The task to send to the worker |
-| `name` | string | auto-generated | Unique worker name (lowercase, hyphens, max 31 chars) |
-| `model` | string | from settings | Model ID, launched through the Kiro provider at maximum thinking |
-| `timeout` | number | `120000` | Timeout in milliseconds |
-| `direction` | `"right"` \| `"down"` | `"right"` | Pane split direction |
+## Command line helper
 
-## Settings
+```bash
+~/.pi/agent/bin/herdr-worker.sh <agent-name> "<prompt>" [--model <model>] [--thinking <level>] [--timeout <ms>]
 
-Configuration lives at `~/.pi/agent/herdr-worker.json`:
-
-```json
-{
-  "defaultModel": "gpt-5-6-luna",
-  "allowedModels": ["gpt-5-6-luna"],
-  "defaultTimeout": 120000,
-  "defaultDirection": "right"
-}
+~/.pi/agent/bin/herdr-worker.sh pi-test "Run npm test and report results" \
+  --model openai/gpt-4o --thinking medium --timeout 180000
 ```
 
-## How It Works
+## Requirements
 
-1. Creates a new isolated Herdr tab
-2. Launches a pi worker in the tab's root pane using Kiro's `gpt-5-6-luna` model at maximum thinking
-3. Submits the task and waits for completion
-4. Reads the worker's output
-5. Closes the tab and stops the worker automatically
+- Pi must be running inside a Herdr-managed pane (`HERDR_ENV=1`)
+- Herdr must be installed and running
+- The requested models must be available and authenticated in Pi
+
+## How temporary spawning works
+
+1. Create a new Herdr tab without taking focus.
+2. Start a fresh Pi agent with the configured default model/thinking settings, unless explicitly overridden.
+3. Send the prompt and wait for its response.
+4. Read the response and close the temporary tab.
 
 ## License
 

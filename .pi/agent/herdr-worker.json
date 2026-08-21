@@ -1,10 +1,10 @@
 {
-  "defaultModel": "opencode/mimo-v2.5-free",
+  "defaultModel": "kiro/gpt-5-6-luna",
   "allowedModels": [
-    "deepseek-v4-flash-free",
-    "opencode/mimo-v2.5-free",
-    "openrouter/free"
+    "kiro/gpt-5-6-luna",
+    "kiro/gpt-5-6-sol",
+    "kiro/claude-opus-4-8"
   ],
-  "defaultTimeout": 120000,
-  "defaultDirection": "right"
+  "defaultThinking": "max",
+  "defaultTimeout": 300000
 }
