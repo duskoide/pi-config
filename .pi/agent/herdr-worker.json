@@ -2,8 +2,8 @@
   "defaultModel": "kiro/gpt-5-6-luna",
   "allowedModels": [
     "kiro/gpt-5-6-luna",
-    "kiro/gpt-5-6-sol",
-    "kiro/claude-opus-4-8"
+    "deepseek/deepseek-v4-flash",
+    "antigravity/gemini-3.7-flash"
   ],
   "defaultThinking": "max",
   "defaultTimeout": 300000
