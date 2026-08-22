@@ -318,8 +318,14 @@ function applyStatus(ctx: ExtensionContext, config: WorkerConfig, worker: Worker
 
 function findModel(ctx: ExtensionContext, requested: string) {
   const exact = requested.includes("/") ? requested.split("/", 2) : undefined;
-  if (exact) return ctx.modelRegistry.find(exact[0]!, exact[1]!);
+  if (exact) {
+    const scoped = ctx.scopedModels?.find((s) => s.model.provider === exact[0] && s.model.id === exact[1]);
+    if (scoped) return scoped.model;
+    return ctx.modelRegistry.find(exact[0]!, exact[1]!);
+  }
 
+  const scoped = ctx.scopedModels?.find((s) => s.model.id === requested);
+  if (scoped) return scoped.model;
   return ctx.modelRegistry.getAvailable().find((model) => model.id === requested);
 }
 
@@ -660,10 +666,13 @@ export default function herdrSpawn(pi: ExtensionAPI) {
   };
 
   // Build a SelectList submenu factory for picking a model from the registry.
+  // Prioritizes session-scoped models (from enabledModels / --models / /scoped-models)
+  // so the picker automatically adjusts to the active scope.
   const modelSubmenu =
     (ctx: ExtensionContext, includeInherit: boolean) =>
     (current: string, done: (selected?: string) => void): Component => {
-      const available = ctx.modelRegistry.getAvailable();
+      const scoped = ctx.scopedModels?.map((s) => s.model) ?? [];
+      const available = scoped.length > 0 ? scoped : ctx.modelRegistry.getAvailable();
       const items: SelectItem[] = [];
       if (includeInherit) {
         items.push({
@@ -675,7 +684,12 @@ export default function herdrSpawn(pi: ExtensionAPI) {
       for (const model of available) {
         const id = `${model.provider}/${model.id}`;
         if (includeInherit && !workerModelAllowed(id)) continue;
-        items.push({ value: id, label: id, description: model.provider });
+        const isCurrent = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` === id : false;
+        items.push({
+          value: id,
+          label: id,
+          description: `${model.provider}${isCurrent ? " (active)" : ""}`,
+        });
       }
 
       return searchableSelect(items, current, done);
@@ -923,6 +937,32 @@ export default function herdrSpawn(pi: ExtensionAPI) {
     regularTools = undefined;
     applyStatus(ctx, config, worker);
     notify(ctx, "Herdr worker ready in regular mode. The agent can enter brain mode with worker_mode or automatically through worker_delegate; /worker-config remains available for manual control.");
+  });
+
+  // Auto-sync with scoped model and active model changes (e.g. Ctrl+P model cycling, /model).
+  pi.on("model_select", async (event, ctx) => {
+    const nextModel = `${event.model.provider}/${event.model.id}`;
+    if (config.brainModel) {
+      config.brainModel = nextModel;
+    }
+    // If worker inherits the brain model and is active, restart with the new model.
+    if (config.workerModel === undefined && config.mode === "brain" && worker) {
+      await stopWorker(ctx);
+      await startWorker(ctx);
+    }
+    applyStatus(ctx, config, worker);
+  });
+
+  // Auto-sync with thinking level changes (e.g. Shift+Tab, /thinking).
+  pi.on("thinking_level_select", async (event, ctx) => {
+    if (config.brainThinking) {
+      config.brainThinking = event.level as ThinkingLevel;
+    }
+    if (config.workerThinking === undefined && config.mode === "brain" && worker) {
+      await stopWorker(ctx);
+      await startWorker(ctx);
+    }
+    applyStatus(ctx, config, worker);
   });
 
   pi.on("session_shutdown", async () => {
