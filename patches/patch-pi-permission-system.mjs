@@ -32,7 +32,7 @@
 //  - unknown/unregistered tools are still blocked before permission checks
 //  - explicit `deny` rules always win
 //
-// Usage: node patches/patch-pi-permission-system.mjs <pi-agent-dir>
+// Usage: node patches/patch-pi-permission-system.mjs <package-or-agent-dir>
 // Exit 0 = patched or already patched; exit 1 = package layout changed.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -41,8 +41,13 @@ import { join } from "node:path";
 const MARKER_V1 = "// pi-config:yolo-patch-v1";
 const MARKER_V2 = "// pi-config:yolo-patch-v2";
 const MARKER_V3 = "// pi-config:yolo-patch-v3";
-const agentDir = process.argv[2] ?? join(process.env.HOME, ".pi", "agent");
-const pkgDir = join(agentDir, "npm", "node_modules", "@gotgenes", "pi-permission-system");
+// Argument is either the unified package root (pi-config repo, package
+// installed at <root>/node_modules) or the legacy pi agent dir
+// (<root>/npm/node_modules).
+const root = process.argv[2] ?? join(process.env.HOME, ".pi", "agent");
+const unifiedPkg = join(root, "node_modules", "@gotgenes", "pi-permission-system");
+const legacyPkg = join(root, "npm", "node_modules", "@gotgenes", "pi-permission-system");
+const pkgDir = existsSync(unifiedPkg) ? unifiedPkg : legacyPkg;
 
 if (!existsSync(pkgDir)) {
   console.error(`patch-pi-permission-system: package not found at ${pkgDir}`);

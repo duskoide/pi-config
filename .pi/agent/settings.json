@@ -2,48 +2,23 @@
   "lastChangelogVersion": "0.84.2",
   "theme": "dark",
   "packages": [
-    "npm:pi-commandcode-provider@0.5.0",
-    "npm:@ogulcancelik/pi-herdr@0.4.0",
-    "npm:@juicesharp/rpiv-ask-user-question@2.4.0",
-    "npm:@juicesharp/rpiv-todo@2.4.0",
-    "npm:@juicesharp/rpiv-web-tools@2.4.0",
-    "npm:@mrclrchtr/supi-web@4.7.0",
-    "npm:pi-undo-redo@0.1.1",
-    "npm:@arvoretech/pi-kiro-provider@0.8.5",
-    "npm:pi-alibaba-models@1.0.14",
-    "npm:@upstash/context7-pi@0.1.2",
-    "npm:pi-simplify@0.2.3",
-    "npm:@gotgenes/pi-permission-system@24.0.0",
-    "npm:pi-agent-browser-native",
-    "npm:@ogulcancelik/pi-codex-compaction",
-    "npm:@ff-labs/pi-fff",
-    "npm:@xynogen/pix-pretty",
-    "npm:@plannotator/pi-extension",
-    "npm:pi-mcp-adapter",
-    "npm:@gaodes/pi-graphify",
-    "npm:pi-redact-all",
-    "npm:pi-herdr-sudo-task",
-    "git:github.com/duskoide/pi-herdr-worker"
+    "../../pi-config"
   ],
-  "defaultProvider": "kiro",
-  "defaultModel": "claude-opus-4-8",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "antigravity",
+  "defaultModel": "gemini-3.7-flash",
+  "defaultThinkingLevel": "high",
   "terminal": {
     "showTerminalProgress": true
   },
   "defaultProjectTrust": "always",
   "quietStartup": false,
   "enabledModels": [
-    "opencode/big-pickle",
-    "opencode/deepseek-v4-flash-free",
-    "opencode/mimo-v2.5-free",
     "kiro/gpt-5-6-luna",
     "kiro/gpt-5-6-sol",
-    "alibaba-plan/qwen3.8-max",
     "kiro/claude-opus-4-8",
     "deepseek/deepseek-v4-flash",
-    "alibaba-plan/deepseek-v4-flash-0731",
-    "alibaba-plan/deepseek-v4-pro"
+    "antigravity/gemini-3.7-flash",
+    "antigravity/claude-opus-4-6"
   ],
   "tuiMode": "fullscreen"
 }

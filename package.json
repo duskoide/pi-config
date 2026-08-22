@@ -1,0 +1,102 @@
+{
+  "name": "pi-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unified Pi package — all extensions, skills, prompts, and config in one place",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": [
+      "./extensions",
+
+      "./node_modules/pi-commandcode-provider/index.ts",
+      "./node_modules/@ogulcancelik/pi-herdr/index.ts",
+      "./node_modules/@juicesharp/rpiv-ask-user-question/index.ts",
+      "./node_modules/@juicesharp/rpiv-todo/index.ts",
+      "./node_modules/@juicesharp/rpiv-web-tools/index.ts",
+      "./node_modules/@mrclrchtr/supi-web/src/extension.ts",
+      "./node_modules/pi-undo-redo/src/extension.ts",
+      "./node_modules/@arvoretech/pi-kiro-provider/dist/index.js",
+      "./node_modules/@upstash/context7-pi/extensions",
+      "./node_modules/pi-simplify/dist/index.js",
+      "./node_modules/@gotgenes/pi-permission-system/src/index.ts",
+      "./node_modules/pi-agent-browser-native/dist/extensions/agent-browser/index.js",
+      "./node_modules/@ogulcancelik/pi-codex-compaction/index.ts",
+      "./node_modules/@ff-labs/pi-fff/src/index.ts",
+      "./node_modules/@xynogen/pix-pretty",
+      "./node_modules/@plannotator/pi-extension/",
+      "./node_modules/pi-mcp-adapter/index.ts",
+      "./node_modules/@gaodes/pi-graphify/src/tools/index.ts",
+      "./node_modules/@gaodes/pi-graphify/src/commands/index.ts",
+      "./node_modules/pi-redact-all/dist/index.js",
+      "./node_modules/pi-herdr-sudo-task/dist/index.js",
+      "./node_modules/pi-antigravity/src/index.ts",
+
+      "./pi-herdr-worker/extensions"
+    ],
+    "skills": [
+      "./skills",
+
+      "./node_modules/@upstash/context7-pi/skills",
+      "./node_modules/pi-mcp-adapter/skills",
+      "./node_modules/@gaodes/pi-graphify/skills",
+
+      "./pi-herdr-worker/skills"
+    ],
+    "prompts": [
+      "./node_modules/@upstash/context7-pi/prompts"
+    ]
+  },
+  "dependencies": {
+    "pi-commandcode-provider": "0.5.0",
+    "@ogulcancelik/pi-herdr": "0.4.0",
+    "@juicesharp/rpiv-ask-user-question": "2.4.0",
+    "@juicesharp/rpiv-todo": "2.4.0",
+    "@juicesharp/rpiv-web-tools": "2.4.0",
+    "@mrclrchtr/supi-web": "4.7.0",
+    "pi-undo-redo": "0.1.1",
+    "@arvoretech/pi-kiro-provider": "0.8.5",
+    "@upstash/context7-pi": "0.1.2",
+    "pi-simplify": "0.2.3",
+    "@gotgenes/pi-permission-system": "24.0.0",
+    "pi-agent-browser-native": "0.3.0",
+    "@ogulcancelik/pi-codex-compaction": "0.1.3",
+    "@ff-labs/pi-fff": "0.10.5",
+    "@xynogen/pix-pretty": "1.17.0",
+    "@plannotator/pi-extension": "0.27.6",
+    "pi-mcp-adapter": "2.27.0",
+    "@gaodes/pi-graphify": "0.2.2",
+    "pi-redact-all": "0.1.7",
+    "pi-herdr-sudo-task": "0.1.5",
+    "pi-antigravity": "0.4.1"
+  },
+  "bundledDependencies": [
+    "pi-commandcode-provider",
+    "@ogulcancelik/pi-herdr",
+    "@juicesharp/rpiv-ask-user-question",
+    "@juicesharp/rpiv-todo",
+    "@juicesharp/rpiv-web-tools",
+    "@mrclrchtr/supi-web",
+    "pi-undo-redo",
+    "@arvoretech/pi-kiro-provider",
+    "@upstash/context7-pi",
+    "pi-simplify",
+    "@gotgenes/pi-permission-system",
+    "pi-agent-browser-native",
+    "@ogulcancelik/pi-codex-compaction",
+    "@ff-labs/pi-fff",
+    "@xynogen/pix-pretty",
+    "@plannotator/pi-extension",
+    "pi-mcp-adapter",
+    "@gaodes/pi-graphify",
+    "pi-redact-all",
+    "pi-herdr-sudo-task",
+    "pi-antigravity"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
+  }
+}

@@ -4,8 +4,7 @@
 	"autoDiscover": true,
 	"autoDiscoverModels": true,
 	"maxAccountsPerProvider": 10,
-	"includeQwen": true,
-	"qwenProvider": "alibaba",
+	"includeQwen": false,
 	"includeOllama": true,
 	"includeCursor": true,
 	"neverFailoverProviders": [],
@@ -13,7 +12,6 @@
 		"anthropic",
 		"openai-codex",
 		"cursor",
-		"qwen",
 		"ollama"
 	],
 	"cooldownMs": 21600000,

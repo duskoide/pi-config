@@ -107,21 +107,25 @@ done < <(
 # The embedded pi-herdr-worker package has no third-party runtime install step;
 # Pi supplies its declared peer dependencies.
 
+# --- Package dependencies --------------------------------------------------
+
+# Install all bundled npm dependencies for the unified package.
+# --legacy-peer-deps: pi supplies the @earendil-works/* core packages at
+# runtime, so they are declared as peerDependencies but not installed here.
+# This replaces the old per-package install loop.
+log "installing package dependencies"
+(cd "$REPO_DIR" && npm install --production --legacy-peer-deps)
+
 export PI_CODING_AGENT_DIR="$PI_DIR"
 
-# Reconcile every pinned package into Pi's package cache. Running this after
-# linking settings makes a clone self-contained instead of relying on a
-# package cache copied from another machine. pi install is idempotent for an
-# already-installed exact source.
-while IFS= read -r package_source; do
-  [[ -n "$package_source" ]] || continue
-  log "installing ${package_source}"
-  pi install --no-approve "$package_source" >/dev/null
- done < <(node -e 'for (const source of require(process.argv[1]).packages ?? []) console.log(source)' "$PI_DIR/settings.json")
+# Register the unified local package with pi. pi install is idempotent
+# for an already-installed path.
+log "registering unified package: $REPO_DIR"
+pi install --no-approve "$REPO_DIR" >/dev/null
 
-# Apply pi-config patches to pinned packages (idempotent; re-applied after
-# every pi install above so upgrades never lose them).
-node "$REPO_DIR/patches/patch-pi-permission-system.mjs" "$PI_DIR"
+# Apply pi-config patches to bundled packages (idempotent; re-applied after
+# npm install so upgrades never lose them).
+node "$REPO_DIR/patches/patch-pi-permission-system.mjs" "$REPO_DIR"
 
 # Register Herdr's pi integration (agent state reporting) when Herdr is
 # available. It installs a Herdr-managed extension into $PI_DIR/extensions.
