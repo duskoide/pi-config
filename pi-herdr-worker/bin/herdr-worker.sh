@@ -67,7 +67,7 @@ if [[ -n "$MODEL" && -f "$CONFIG_PATH" ]]; then
   if ! jq -e --arg model "$MODEL" '
     (.allowedModels // []) as $allowed |
     ($allowed | length) == 0 or
-    any($allowed[]; . == $model or . == ($model | split("/")[-1]) or endswith("/" + ($model | split("/")[-1])))
+    any($allowed[]; . == "inherit" or . == "__inherit__" or . == $model or . == ($model | split("/")[-1]) or endswith("/" + ($model | split("/")[-1])))
   ' "$CONFIG_PATH" >/dev/null; then
     echo "Error: model is not allowed by $CONFIG_PATH: $MODEL" >&2
     exit 1

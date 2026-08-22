@@ -129,7 +129,10 @@ function loadDiskWorkerConfig(): DiskWorkerConfig {
   try {
     const parsed = JSON.parse(readFileSync(join(getAgentDir(), "herdr-worker.json"), "utf8")) as DiskWorkerConfig;
     return {
-      defaultModel: typeof parsed.defaultModel === "string" ? parsed.defaultModel : undefined,
+      defaultModel:
+        typeof parsed.defaultModel === "string" && parsed.defaultModel !== "inherit"
+          ? parsed.defaultModel
+          : undefined,
       allowedModels: Array.isArray(parsed.allowedModels)
         ? parsed.allowedModels.filter((value): value is string => typeof value === "string")
         : undefined,
@@ -420,9 +423,10 @@ export default function herdrSpawn(pi: ExtensionAPI) {
       throw error;
     }
     const startArgs = ["agent", "start", name, "--kind", "pi", "--pane", paneId, "--"];
+    const isInherited = config.workerModel === undefined;
     const model = modelArgument(ctx, config);
     const thinking = config.workerThinking ?? config.brainThinking ?? ctx.thinkingLevel;
-    if (model && !workerModelAllowed(model)) {
+    if (model && !workerModelAllowed(model, isInherited)) {
       await closeWorkerAsync({ name, paneId, tabId, workspaceId: caller.workspaceId });
       throw new Error(`Worker model is not allowed by herdr-worker.json: ${model}`);
     }
@@ -515,9 +519,11 @@ export default function herdrSpawn(pi: ExtensionAPI) {
     return run;
   };
 
-  function workerModelAllowed(requested: string): boolean {
+  function workerModelAllowed(requested: string, isInherited = false): boolean {
     const allowed = diskConfig.allowedModels;
     if (!allowed?.length) return true;
+    if (isInherited && (allowed.includes("inherit") || allowed.includes("__inherit__"))) return true;
+    if (requested === "inherit" || requested === "__inherit__") return true;
     const bare = requested.includes("/") ? requested.split("/", 2)[1]! : requested;
     return allowed.some((value) => value === requested || value === bare || value.endsWith(`/${bare}`));
   }
@@ -573,9 +579,13 @@ export default function herdrSpawn(pi: ExtensionAPI) {
     ctx: ExtensionContext,
   ) => {
     if (key === "worker-model") {
-      if (!workerModelAllowed(value)) throw new Error(`Worker model is not allowed by herdr-worker.json: ${value}`);
-      if (!findModel(ctx, value)) throw new Error(`Model not found: ${value}`);
-      config.workerModel = value;
+      if (value === "inherit" || value === "__inherit__") {
+        config.workerModel = undefined;
+      } else {
+        if (!workerModelAllowed(value)) throw new Error(`Worker model is not allowed by herdr-worker.json: ${value}`);
+        if (!findModel(ctx, value)) throw new Error(`Model not found: ${value}`);
+        config.workerModel = value;
+      }
     } else {
       config.workerThinking = value as ThinkingLevel;
     }
