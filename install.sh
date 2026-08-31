@@ -104,9 +104,6 @@ done < <(
     -print0
 )
 
-# The embedded pi-herdr-worker package has no third-party runtime install step;
-# Pi supplies its declared peer dependencies.
-
 # --- Package dependencies --------------------------------------------------
 
 # Install all bundled npm dependencies for the unified package.
@@ -136,7 +133,7 @@ if command -v herdr >/dev/null 2>&1; then
 fi
 
 log "checking Pi configuration"
-node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); JSON.parse(require("fs").readFileSync(process.argv[2], "utf8"));' \
-  "$PI_DIR/settings.json" "$REPO_DIR/pi-herdr-worker/package.json"
+node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));' \
+  "$PI_DIR/settings.json"
 pi --version
 log "ready; authenticate with /login on this machine"

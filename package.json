@@ -29,18 +29,14 @@
       "./node_modules/@gaodes/pi-graphify/src/commands/index.ts",
       "./node_modules/pi-redact-all/dist/index.js",
       "./node_modules/pi-herdr-sudo-task/dist/index.js",
-      "./node_modules/pi-antigravity/src/index.ts",
-
-      "./pi-herdr-worker/extensions"
+      "./node_modules/pi-antigravity/src/index.ts"
     ],
     "skills": [
       "./skills",
 
       "./node_modules/@upstash/context7-pi/skills",
       "./node_modules/pi-mcp-adapter/skills",
-      "./node_modules/@gaodes/pi-graphify/skills",
-
-      "./pi-herdr-worker/skills"
+      "./node_modules/@gaodes/pi-graphify/skills"
     ],
     "prompts": [
       "./node_modules/@upstash/context7-pi/prompts"
