@@ -47,11 +47,10 @@ The credential file on the source machine contained live-looking API/OAuth token
 ## What is portable
 
 - `herdr/config.toml`: keybindings, theme, and UI settings for Herdr
-- `settings.json` and append-system instructions (worker-workflow delegation; subagents are intentionally not configured — work goes through `pi-herdr-worker`)
+- `settings.json` and append-system instructions (worker-workflow delegation removed; subagents are intentionally not configured)
 - the unified Pi package: this repo is a Pi package (`package.json` with a `pi` manifest) that bundles
   - custom extensions (Macaron provider, PDF-to-Markdown, provider failover, permission bridge) in `extensions/`
   - checked-in skills (`find-skills`, Herdr operating instructions) in `skills/`
-  - the embedded `pi-herdr-worker` package
   - all third-party Pi packages (herdr, graphify, mcp-adapter, browser, fff, plannotator, simplify, undo-redo, redact-all, sudo-task, providers, rpiv, context7, supi-web, codex-compaction, pix-pretty) as **pinned npm dependencies** in `package.json`, installed into `node_modules/`
 - provider/package settings that do not contain tokens
 
