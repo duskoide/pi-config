@@ -28,7 +28,7 @@
  *         "api": "openai-completions",            // openai-completions | anthropic-messages |
  *                                                 // openai-responses | google-generative-ai
  *         "contextWindow": 128000,                // optional defaults for fetched models
- *         "maxTokens": 8192,
+ *         "maxTokens": -1,                        // -1 = unbounded: no client cap, server limit wins
  *         "fetchModels": true                     // set false to skip startup fetch
  *       }
  *     ]
@@ -209,7 +209,9 @@ function toModelConfig(sp: StoredProvider, m: FetchedModel): ProviderModelConfig
 		input: ["text"],
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 		contextWindow: m.contextWindow ?? sp.contextWindow ?? 128_000,
-		maxTokens: m.maxTokens ?? sp.maxTokens ?? 8192,
+		// -1 = unbounded: don't send a client-side cap, let the server's own
+		// limit apply (e.g. llama.cpp -n -1). Prevents silent 8k truncation.
+		maxTokens: m.maxTokens ?? sp.maxTokens ?? -1,
 	};
 }
 
