@@ -1,8 +1,10 @@
 # Portable Pi + Herdr configuration
 
-This directory is the source of truth for my Pi and Herdr setup. It keeps both tools' static configuration and custom resources in Git while leaving credentials and machine runtime data local.
+This repository is a clean baseline for the current Pi setup. It keeps portable
+configuration, custom Pi resources, and exact third-party package selections in
+Git while leaving credentials and machine runtime data local.
 
-## New machine
+## Install
 
 Requirements: Node.js, npm, curl, and Git.
 
@@ -15,63 +17,77 @@ pi
 
 The installer:
 
-- installs the latest stable Pi release by default; set `PI_VERSION` to request an exact version
-- installs Herdr via its official installer (`https://herdr.dev/install.sh`) when `herdr` is not already on `PATH` (latest stable; the installer does not support pinning)
-- links the checked-in Pi files into `~/.pi/agent`, the top-level Pi files (including `web-search.json`) into `~/.pi`, and `herdr/config.toml` into `~/.config/herdr/config.toml`
-- runs `npm install` in the repo to fetch all bundled package dependencies (pinned in `package.json`)
-- registers the repo itself as a unified Pi package (`pi install .`) — every extension and skill ships from here
-- applies `patches/` to bundled packages, installs Herdr's Pi integration when Herdr is present, and validates the configuration
+- installs Pi `0.85.1` by default (`PI_VERSION=latest` opts into the latest stable release)
+- installs Herdr from its official installer when it is not already available
+- links the allowlisted files under `.pi/agent/` into `~/.pi/agent`
+- links `.pi/web-search.json` and `herdr/config.toml` into their standard locations
+- installs each pinned npm/Git Pi package listed in `.pi/agent/settings.json`
+- installs the local package containing this repository's custom extensions and skills
+- registers Herdr's generated Pi integration without copying that generated file into Git
 
-It is safe to run repeatedly. Existing files (including symlinks managed by other tools such as home-manager) are moved to a timestamped `.pre-config.*` backup before a link is created. The installer never links or copies `auth.json`, sessions, caches, model catalogs, state, or logs.
+Existing destination files are moved to timestamped `.pre-config.*` backups before
+links are created. The installer never manages `auth.json`, sessions, caches,
+model catalogs, logs, or runtime state.
 
-Overrides before running the installer:
+To test only the filesystem/linking and validation logic without network installs:
 
 ```bash
-PI_VERSION="0.84.2" PI_CODING_AGENT_DIR="$HOME/.config/pi" PI_HOME_DIR="$HOME/.config" HERDR_CONFIG_DIR="$HOME/.config/herdr" ./install.sh
+tmp_home="$(mktemp -d)"
+HOME="$tmp_home" \
+PI_CODING_AGENT_DIR="$tmp_home/.pi/agent" \
+PI_HOME_DIR="$tmp_home/.pi" \
+PI_CONFIG_SKIP_EXTERNAL_INSTALLS=1 \
+./install.sh
+rm -rf "$tmp_home"
 ```
 
-`PI_VERSION` defaults to the npm `latest` tag. Set it to an exact version only when you intentionally need a reproducible install or rollback.
+The normal checkout path is `~/pi-config`; the relative local-package entry in
+the global settings file assumes that layout.
 
-## Credentials
+## What is portable
 
-Credentials are deliberately not part of this repository. On each machine, start Pi and use:
+- `.pi/agent/settings.json`: Pi defaults, enabled models, subagent routing, and
+  exact npm/Git package selections
+- `.pi/agent/keybindings.json` and `.pi/agent/custom-providers.json`
+- user agent definitions under `.pi/agent/agents/`
+- project agent definitions under `.pi/agents/`
+- `.pi/agent/pi-searxng-suite.json` and `.pi/agent/provider-failover.json`
+- custom extensions in `extensions/`
+- custom skills in `skills/`
+- `herdr/config.toml`
+
+The `archive/legacy/` directory is retained for rollback/reference only. Nothing
+there is loaded by the package manifest.
+
+## Credentials and machine data
+
+Credentials are deliberately excluded. Start Pi and use:
 
 ```text
 /login
 ```
 
-Then authenticate each provider you need. API-key providers can also use their documented environment variables. Keep `~/.pi/agent/auth.json` private (`0600`) and never commit it.
+Keep `~/.pi/agent/auth.json` private. API-key settings should use environment
+variables; do not put literal secrets in this repo.
 
-The credential file on the source machine contained live-looking API/OAuth tokens and was not copied here. Rotate or revoke those tokens if they were exposed outside the intended machine/session.
+The repository also excludes sessions, memory, caches, model catalogs, package
+install trees, logs, missions, subagent artifacts, generated Herdr integration
+files, and other runtime state.
 
-## What is portable
+## Updating
 
-- `herdr/config.toml`: keybindings, theme, and UI settings for Herdr
-- `settings.json` and append-system instructions (worker-workflow delegation removed; subagents are intentionally not configured)
-- the unified Pi package: this repo is a Pi package (`package.json` with a `pi` manifest) that bundles
-  - custom extensions (Macaron provider, PDF-to-Markdown, provider failover, permission bridge) in `extensions/`
-  - checked-in skills (`find-skills`, Herdr operating instructions) in `skills/`
-  - all third-party Pi packages (herdr, graphify, mcp-adapter, browser, fff, plannotator, simplify, undo-redo, redact-all, sudo-task, providers, rpiv, context7, supi-web, codex-compaction, pix-pretty) as **pinned npm dependencies** in `package.json`, installed into `node_modules/`
-- provider/package settings that do not contain tokens
+For Pi settings or custom resources, edit the checked-in files and rerun
+`./install.sh`; restart Pi or use `/reload` where appropriate.
 
-Third-party package source code lives in `node_modules/` (git-ignored, regenerated by `npm install`); it is **never overwritten by `pi update`** — updates happen only when you bump a version in `package.json` and re-run `./install.sh`.
+To update a third-party package, change its exact `npm:...@version` or pinned Git
+commit in `.pi/agent/settings.json`, then run `./install.sh`. To update Pi itself,
+set `PI_VERSION` explicitly or change the default in `install.sh`.
 
-## Updating packages
+For Herdr configuration changes, edit `herdr/config.toml` and run:
 
-To update a bundled package, bump its version in `dependencies` in `package.json`, then run `npm install` and `./install.sh` (patches re-apply automatically). To pin a package at its current version forever, just leave `package.json` alone.
+```bash
+herdr server reload-config
+```
 
-## What stays local
-
-- `auth.json` and OAuth refresh/access tokens
-- Herdr's runtime data under `~/.config/herdr` (sockets, logs, `session.json`, plugin locks)
-- sessions, daily memory, caches, model catalogs, failover state, logs, and generated stores
-- `node_modules` (regenerated by `npm install`) and Python virtual environments
-- project trust decisions, which are machine-specific
-
-The repo's `.gitignore` protects these categories. Pi itself may still create them under `~/.pi/agent` during normal operation.
-
-## Updating the setup
-
-When changing Pi resources, edit the checked-in files, then run `./install.sh` and restart Pi (or use `/reload`). Custom extensions and skills are plain files in `extensions/` and `skills/` — edit freely, they are never touched by package installs. For Herdr, edit `herdr/config.toml` in the repo and run `herdr server reload-config`. When adding a new third-party package, add it to `dependencies` and the `pi.extensions`/`pi.skills` manifest in `package.json`, then run `./install.sh`.
-
-Review extensions and skills before enabling them: Pi packages and extensions execute with the permissions of the current user.
+Review extensions, skills, and third-party packages before enabling them: they
+execute with the permissions of the current user.
