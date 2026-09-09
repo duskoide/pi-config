@@ -36,6 +36,7 @@ tmp_home="$(mktemp -d)"
 HOME="$tmp_home" \
 PI_CODING_AGENT_DIR="$tmp_home/.pi/agent" \
 PI_HOME_DIR="$tmp_home/.pi" \
+HERDR_CONFIG_DIR="$tmp_home/.config/herdr" \
 PI_CONFIG_SKIP_EXTERNAL_INSTALLS=1 \
 ./install.sh
 rm -rf "$tmp_home"
