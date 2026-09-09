@@ -34,8 +34,9 @@
  *     ]
  *   }
  *
- * The file lives in the agent dir (not the repo) because it may contain API
- * keys; use `$ENV_VAR` references instead of literal keys when possible.
+ * This setup snapshots the file in the repository and links it into the agent
+ * dir. Use `$ENV_VAR` references instead of literal keys; never commit literal
+ * credentials. The save path preserves that repository symlink when present.
  *
  * Install: place this file in ~/.pi/agent/extensions/ (or .pi/extensions/)
  * and restart pi, or run /reload.
@@ -50,7 +51,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import type { AutocompleteItem } from "@earendil-works/pi-tui";
 import { readFileSync } from "node:fs";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, realpath, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 // =============================================================================
@@ -115,9 +116,12 @@ async function loadConfig(): Promise<ConfigFile> {
 async function saveConfig(cfg: ConfigFile): Promise<void> {
 	const path = getConfigPath();
 	await mkdir(dirname(path), { recursive: true });
-	const tmp = `${path}.tmp`;
+	// Rename the resolved target rather than the symlink itself. Otherwise an
+	// atomic write would silently detach the agent config from this repository.
+	const target = await realpath(path).catch(() => path);
+	const tmp = `${target}.tmp`;
 	await writeFile(tmp, `${JSON.stringify(cfg, null, 2)}\n`, "utf8");
-	await rename(tmp, path);
+	await rename(tmp, target);
 }
 
 function readConfiguredNames(): string[] {

@@ -38,6 +38,27 @@ link_file() {
   ln -s -- "$source" "$destination"
 }
 
+link_path() {
+  local source="$1"
+  local destination="$2"
+  [[ -d "$source" ]] || fail "portable directory is missing: $source"
+  mkdir -p "$(dirname -- "$destination")"
+
+  if [[ -L "$destination" && "$(readlink -f -- "$destination" 2>/dev/null || true)" == "$source" ]]; then
+    return
+  fi
+
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    local backup="${destination}.pre-config.$(date +%Y%m%d%H%M%S)"
+    while [[ -e "$backup" || -L "$backup" ]]; do
+      backup="${destination}.pre-config.$(date +%Y%m%d%H%M%S).$$"
+    done
+    mv -- "$destination" "$backup"
+    log "moved existing ${destination##*/} to ${backup##*/}"
+  fi
+  ln -s -- "$source" "$destination"
+}
+
 remove_obsolete_link() {
   local destination="$1"
   local old_source="$2"
@@ -95,6 +116,7 @@ for relative in \
 done
 
 link_file "$REPO_DIR/.pi/web-search.json" "$PI_HOME_DIR/web-search.json"
+link_path "$REPO_DIR" "$PI_DIR/pi-config"
 
 # Remove the old permission-system link when upgrading an installation made by
 # the previous repository layout. Other machine-local files are untouched.

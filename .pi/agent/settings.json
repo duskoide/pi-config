@@ -21,7 +21,7 @@
     "npm:pi-commandcode-provider@0.6.4",
     "npm:pi-powerline-footer@0.17.0",
     "npm:pi-intercom@0.13.0",
-    "../../pi-config"
+    "./pi-config"
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna",

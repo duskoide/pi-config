@@ -22,7 +22,7 @@ The installer:
 - links the allowlisted files under `.pi/agent/` into `~/.pi/agent`
 - links `.pi/web-search.json` and `herdr/config.toml` into their standard locations
 - installs each pinned npm/Git Pi package listed in `.pi/agent/settings.json`
-- installs the local package containing this repository's custom extensions and skills
+- loads the local package containing this repository's custom extensions and skills
 - registers Herdr's generated Pi integration without copying that generated file into Git
 
 Existing destination files are moved to timestamped `.pre-config.*` backups before
@@ -41,8 +41,11 @@ PI_CONFIG_SKIP_EXTERNAL_INSTALLS=1 \
 rm -rf "$tmp_home"
 ```
 
-The normal checkout path is `~/pi-config`; the relative local-package entry in
-the global settings file assumes that layout.
+The installer creates a `pi-config` symlink beside the global settings file,
+so the checkout can live anywhere. Direct package versions are pinned here, but
+each package's transitive dependency lock remains in Pi's local package cache.
+npm may report pending native install scripts; this installer does not
+auto-approve them.
 
 ## What is portable
 
@@ -67,8 +70,9 @@ Credentials are deliberately excluded. Start Pi and use:
 /login
 ```
 
-Keep `~/.pi/agent/auth.json` private. API-key settings should use environment
-variables; do not put literal secrets in this repo.
+Keep `~/.pi/agent/auth.json` private. The tracked `custom-providers.json`
+may contain provider URLs and `$ENV_VAR` references, but never put literal API
+keys or tokens in this repository.
 
 The repository also excludes sessions, memory, caches, model catalogs, package
 install trees, logs, missions, subagent artifacts, generated Herdr integration
