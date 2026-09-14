@@ -115,6 +115,11 @@ for relative in \
   link_file "$REPO_DIR/.pi/agent/$relative" "$PI_DIR/$relative"
 done
 
+# pi-core-subagent discovers global agent definitions under ~/.pi/agents/.
+for agent in Scout Researcher Worker Reviewer; do
+  link_file "$REPO_DIR/.pi/agents/${agent}.md" "$PI_HOME_DIR/agents/${agent}.md"
+done
+
 link_file "$REPO_DIR/.pi/web-search.json" "$PI_HOME_DIR/web-search.json"
 link_path "$REPO_DIR" "$PI_DIR/pi-config"
 
@@ -168,6 +173,7 @@ fi
 log "checking Pi configuration"
 node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); JSON.parse(require("fs").readFileSync(process.argv[2], "utf8"));' \
   "$PI_DIR/settings.json" "$REPO_DIR/package.json"
+node "$REPO_DIR/scripts/check-pi-config.mjs"
 
 if [[ "$SKIP_EXTERNAL_INSTALLS" == "1" ]]; then
   log "test mode complete"

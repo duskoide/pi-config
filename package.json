@@ -3,16 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "description": "Portable Pi configuration and custom resources",
+  "scripts": {
+    "test": "node --experimental-strip-types --experimental-loader ./tests/pi-test-loader.mjs --test tests/*.test.mjs",
+    "check:config": "node scripts/check-pi-config.mjs",
+    "check:config:live": "node scripts/check-pi-config.mjs --live",
+    "check:failover": "node scripts/check-pi-failover.mjs"
+  },
   "keywords": [
     "pi-package"
   ],
   "pi": {
     "extensions": [
-      "./extensions"
+      "./extensions",
+      "./vendor/pi-core-subagent/src/index.ts"
     ],
     "skills": [
       "./skills"
     ]
+  },
+  "dependencies": {
+    "@juicesharp/rpiv-web-tools": "2.9.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-agent-core": "*",

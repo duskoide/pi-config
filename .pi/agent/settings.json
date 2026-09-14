@@ -3,14 +3,12 @@
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
-    "npm:pi-subagents@0.66.0",
     "npm:pi-antigravity@0.7.2",
     "npm:@ff-labs/pi-fff@0.10.6",
     "npm:@upstash/context7-pi@0.1.2",
     "npm:pi-redact-all@0.2.1",
     "npm:pi-undo-redo@0.1.1",
     "npm:pi-herdr-sudo-task@0.1.5",
-    "npm:@gaodes/pi-graphify@0.2.2",
     "npm:pi-gpt-enhance@0.3.0",
     "npm:@hk_net/pi-usage-bars@0.6.0",
     "npm:@juicesharp/rpiv-ask-user-question@2.9.0",
@@ -19,49 +17,42 @@
     "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
+    "npm:pi-multi-account@1.21.3",
     "npm:pi-powerline-footer@0.17.0",
-    "./pi-config"
+    "./pi-config",
+    {
+      "source": "npm:pi-background-tasks@2.5.0",
+      "extensions": ["extensions/background-tasks.ts"]
+    },
+    "npm:@xynogen/pix-pretty@1.22.0"
   ],
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultProvider": "commandcode",
+  "defaultModel": "deepseek/deepseek-v4.1-flash",
   "defaultThinkingLevel": "max",
   "terminal": {
     "showTerminalProgress": true
   },
-  "defaultProjectTrust": "always",
+  "defaultProjectTrust": "ask",
   "quietStartup": true,
   "enabledModels": [
-    "deepseek/deepseek-v4-flash-vision-exp",
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-sol",
     "openai-codex/gpt-6-astra",
     "antigravity/gemini-3.7-flash",
     "antigravity/claude-opus-4-6",
+    "antigravity/gemini-3.8-flash",
     "llama.cpp/tiel-coder-35b",
     "commandcode/z-ai/glm-5.3-flash",
-    "commandcode/Qwen/Qwen3.8-Flash"
+    "commandcode/Qwen/Qwen3.8-Flash",
+    "commandcode/deepseek/deepseek-v4.1-flash",
+    "deepseek/deepseek-flash",
+    "tokenharbor/deepseek-v4-flash"
   ],
   "tuiMode": "fullscreen",
   "subagents": {
     "defaultModel": "openai-codex/gpt-5.6-luna",
     "defaultThinking": "max",
     "agentOverrides": {
-      "scout": {
-        "model": "llama.cpp/tiel-coder-35b",
-        "thinking": "high"
-      },
-      "researcher": {
-        "model": "commandcode/z-ai/glm-5.3-flash",
-        "thinking": "max"
-      },
-      "worker": {
-        "model": "llama.cpp/tiel-coder-35b",
-        "thinking": "max"
-      },
-      "reviewer": {
-        "model": "openai-codex/gpt-5.6-luna",
-        "thinking": "max"
-      },
       "oracle": {
         "model": "openai-codex/gpt-5.6-sol",
         "thinking": "high"
@@ -81,6 +72,6 @@
   "markdown": {
     "mermaid": "streaming"
   },
-  "httpIdleTimeoutMs": 0,
+  "httpIdleTimeoutMs": 300000,
   "outputPad": 1
 }

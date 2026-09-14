@@ -37,6 +37,8 @@ extensions/*/logs/
 # Project-scoped Pi/subagent runtime data
 .pi/npm/
 .pi/subagents/
+.pi/tasks/
+.pi/fusion/
 .pi/subagentura-state.json
 subagentura-state.json
 
