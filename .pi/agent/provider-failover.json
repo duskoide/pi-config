@@ -27,8 +27,8 @@
 	"pendingPollMs": 60000,
 	"maxAutoContinuesPerPrompt": 2,
 	"fallbacks": [
-		"deepseek/deepseek-flash",
-		"tokenharbor/deepseek-v4-flash"
+		"tokenharbor/deepseek-v4-flash",
+		"commandcode/Qwen/Qwen3.8-27B"
 	],
 	"openaiCodexAliases": [],
 	"anthropicOAuthAliases": [],

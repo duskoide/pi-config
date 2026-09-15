@@ -48,6 +48,7 @@
     "llama.cpp/tiel-coder-35b",
     "commandcode/z-ai/glm-5.3-flash",
     "commandcode/deepseek/deepseek-v4.1-flash",
+    "commandcode/Qwen/Qwen3.8-27B",
     "deepseek/deepseek-flash",
     "tokenharbor/deepseek-v4-flash",
     "tokenharbor/glm-5.3-flash",

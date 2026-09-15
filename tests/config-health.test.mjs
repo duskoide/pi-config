@@ -226,7 +226,7 @@ test("repository failover routes deprioritize Codex and target the DeepSeek-fami
 		!report.checks.providerPriority.includes("anthropic"),
 		"providerPriority must not rank anthropic, which has no credential",
 	);
-	assert.deepEqual(report.checks.fallbacks, ["deepseek/deepseek-flash", "tokenharbor/deepseek-v4-flash"]);
+	assert.deepEqual(report.checks.fallbacks, ["tokenharbor/deepseek-v4-flash", "commandcode/Qwen/Qwen3.8-27B"]);
 	assert.equal(report.checks.failoverPolicy.includeOtherProviders, false);
 });
 
