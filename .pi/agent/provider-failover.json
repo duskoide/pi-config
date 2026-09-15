@@ -11,12 +11,11 @@
 	"childProxy": false,
 	"neverFailoverProviders": [],
 	"providerOrder": [
-		"openai-codex",
-		"anthropic"
+		"openai-codex"
 	],
 	"providerPriority": [
-		"openai-codex",
-		"anthropic"
+		"deepseek",
+		"tokenharbor"
 	],
 	"cooldownMs": 21600000,
 	"probeCooldownMs": 300000,
@@ -27,7 +26,10 @@
 	"usageStatusRefreshMs": 60000,
 	"pendingPollMs": 60000,
 	"maxAutoContinuesPerPrompt": 2,
-	"fallbacks": [],
+	"fallbacks": [
+		"deepseek/deepseek-flash",
+		"tokenharbor/deepseek-v4-flash"
+	],
 	"openaiCodexAliases": [],
 	"anthropicOAuthAliases": [],
 	"limitErrorPatterns": [

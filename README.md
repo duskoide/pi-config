@@ -127,18 +127,32 @@ primary-failure → fallback-success only; it does not prove production provider
 availability or account rotation.
 
 `pi-multi-account` owns runtime account rotation and failover. The tracked
-`provider-failover.json` keeps managed subscription families in `providerOrder`
-and sets `includeOtherProviders` to `false`: providerPriority is ordering, not
-an allowlist, so broad API-key discovery is deliberately disabled. It also keeps
-`autoDiscoverModels`, `childProxy`, and `debugLog` off by default, avoiding the
-configured live-catalog discovery path, loopback auth shadowing, and persistent
-failover logs. Other registration/publication paths may still exist in the
-extension. It also caps automatic continuations at two per prompt. The current
-Command Code default is outside managed account discovery, and no automatic
-cross-provider API-key fallback is enabled; production recovery from that
-route remains unverified. Installing it enables code that reads `auth.json` and
-may update failover state; it fingerprints credentials rather than logging raw
-keys.
+`provider-failover.json` deliberately does **not** rank `openai-codex` as a
+failover destination: that family's ranking auto-selects its flagship model
+(`openai-codex/gpt-5.6-sol`). `providerPriority` is the ordered ladder that
+decides cross-provider selection — unlisted providers sort after everything
+listed — so it reads `deepseek -> tokenharbor` and the explicit `fallbacks` list
+targets `deepseek/deepseek-flash`, then `tokenharbor/deepseek-v4-flash`.
+
+`providerOrder` is **not** an exclusion mechanism: `normalizeConfig()` treats it
+as a sequence preference and re-appends every unlisted managed family, so
+`openai-codex` and `anthropic` remain in it regardless. It therefore lists only
+`openai-codex`, the sole managed family this machine actually has credentials
+for; `anthropic` has no credential, so it is left unranked in both ladders where
+possible and is never a preferred target.
+
+`includeOtherProviders` stays `false`: providerPriority is ordering, not an
+allowlist, so broad API-key discovery remains disabled even though two routes are
+named explicitly. Explicit targets still resolve, because `resolveTargets()`
+looks up a named provider+model through `findModelIncludingHidden()` rather than
+through the discovery gate. It also keeps `autoDiscoverModels`, `childProxy`, and
+`debugLog` off by default, avoiding the configured live-catalog discovery path,
+loopback auth shadowing, and persistent failover logs. Other
+registration/publication paths may still exist in the extension. It also caps
+automatic continuations at two per prompt. The current Command Code default is
+outside managed account discovery, so production recovery from that route is
+still unverified. Installing it enables code that reads `auth.json` and may
+update failover state; it fingerprints credentials rather than logging raw keys.
 
 ## Credentials and machine data
 

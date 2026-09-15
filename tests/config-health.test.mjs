@@ -65,9 +65,9 @@ const healthyFailover = {
 	includeOtherProviders: false,
 	childProxy: false,
 	debugLog: false,
-	providerOrder: ["openai-codex", "anthropic"],
-	providerPriority: ["openai-codex", "anthropic"],
-	fallbacks: [],
+	providerOrder: ["openai-codex"],
+	providerPriority: ["deepseek", "tokenharbor"],
+	fallbacks: ["deepseek/deepseek-flash", "tokenharbor/deepseek-v4-flash"],
 	maxAutoContinuesPerPrompt: 2,
 };
 
@@ -143,8 +143,7 @@ test("live parser rejects prompt echoes and accepts the exact routed response", 
 	assert.match(toolResult.reason, /tool calls/);
 });
 
-test("provider priority keeps proven Codex ahead of unverified OpenAI", async () => {
-	const fixture = await makeFixture(healthySettings, {
+test("provider priority keeps proven Codex ahead of unverified OpenAI", async () => {	const fixture = await makeFixture(healthySettings, {
 		...healthyFailover,
 		providerPriority: ["commandcode", "deepseek", "tokenharbor", "openai", "openai-codex"],
 	});
@@ -204,13 +203,31 @@ test("healthy configuration passes static checks with a managed-only rotation wa
 		const report = inspectConfig(fixture);
 		assert.equal(report.ok, true);
 		assert.deepEqual(report.errors, []);
-		assert.match(report.warnings.join("\n"), /explicit fallbacks is empty/);
+		assert.doesNotMatch(report.warnings.join("\n"), /explicit fallbacks is empty/);
 		assert.match(report.warnings.join("\n"), /default provider commandcode is outside managed failover discovery/);
-		assert.equal(report.checks.fallbackCount, 0);
+		assert.equal(report.checks.fallbackCount, 2);
 		assert.equal(report.checks.defaultRoute, "commandcode/deepseek/deepseek-v4.1-flash");
 	} finally {
 		await rm(fixture.root, { recursive: true, force: true });
 	}
+});
+
+test("repository failover routes deprioritize Codex and target the DeepSeek-family routes", () => {
+	const report = inspectConfig();
+	// providerOrder is only a sequence preference: pi-multi-account re-appends every unlisted
+	// managed family, so it cannot exclude openai-codex. providerPriority is the ordered ladder
+	// that actually decides cross-provider selection, and unlisted providers sort last.
+	assert.deepEqual(report.checks.providerPriority, ["deepseek", "tokenharbor"]);
+	assert.ok(
+		!report.checks.providerPriority.includes("openai-codex"),
+		"providerPriority must not rank openai-codex, whose family auto-selects the sol flagship",
+	);
+	assert.ok(
+		!report.checks.providerPriority.includes("anthropic"),
+		"providerPriority must not rank anthropic, which has no credential",
+	);
+	assert.deepEqual(report.checks.fallbacks, ["deepseek/deepseek-flash", "tokenharbor/deepseek-v4-flash"]);
+	assert.equal(report.checks.failoverPolicy.includeOtherProviders, false);
 });
 
 test("unsafe or drifting configuration fails with actionable errors", async () => {
