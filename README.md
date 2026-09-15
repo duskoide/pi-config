@@ -135,7 +135,7 @@ failover destination: that family's ranking auto-selects its flagship model
 (`openai-codex/gpt-5.6-sol`). `providerPriority` is the ordered ladder that
 decides cross-provider selection — unlisted providers sort after everything
 listed — so it reads `deepseek -> tokenharbor` and the explicit `fallbacks` list
-targets `deepseek/deepseek-flash`, then `tokenharbor/deepseek-v4-flash`.
+names `tokenharbor/deepseek-v4-flash`, then `commandcode/Qwen/Qwen3.8-27B`.
 
 `providerOrder` is **not** an exclusion mechanism: `normalizeConfig()` treats it
 as a sequence preference and re-appends every unlisted managed family, so
