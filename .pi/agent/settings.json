@@ -22,9 +22,13 @@
     "./pi-config",
     {
       "source": "npm:pi-background-tasks@2.5.0",
-      "extensions": ["extensions/background-tasks.ts"]
+      "extensions": [
+        "extensions/background-tasks.ts"
+      ]
     },
-    "npm:@xynogen/pix-pretty@1.22.0"
+    "npm:@xynogen/pix-pretty@1.22.0",
+    "npm:pi-devin-local",
+    "npm:pi-provider-qoder"
   ],
   "defaultProvider": "commandcode",
   "defaultModel": "deepseek/deepseek-v4.1-flash",
@@ -32,7 +36,7 @@
   "terminal": {
     "showTerminalProgress": true
   },
-  "defaultProjectTrust": "ask",
+  "defaultProjectTrust": "always",
   "quietStartup": true,
   "enabledModels": [
     "openai-codex/gpt-5.6-luna",
@@ -43,10 +47,12 @@
     "antigravity/gemini-3.8-flash",
     "llama.cpp/tiel-coder-35b",
     "commandcode/z-ai/glm-5.3-flash",
-    "commandcode/Qwen/Qwen3.8-Flash",
     "commandcode/deepseek/deepseek-v4.1-flash",
     "deepseek/deepseek-flash",
-    "tokenharbor/deepseek-v4-flash"
+    "tokenharbor/deepseek-v4-flash",
+    "tokenharbor/glm-5.3-flash",
+    "atria-asi/Atria-Dawn-Preview",
+    "devin/swe-1-6-slow"
   ],
   "tuiMode": "fullscreen",
   "subagents": {
@@ -64,7 +70,7 @@
     }
   },
   "fullscreenCopyOnSelect": true,
-  "fullscreenExitOutput": "transcript",
+  "fullscreenExitOutput": "resume-hint",
   "treeFilterMode": "default",
   "doubleEscapeAction": "tree",
   "collapseChangelog": true,
@@ -72,6 +78,6 @@
   "markdown": {
     "mermaid": "streaming"
   },
-  "httpIdleTimeoutMs": 300000,
+  "httpIdleTimeoutMs": 0,
   "outputPad": 1
 }
