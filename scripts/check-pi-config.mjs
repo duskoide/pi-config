@@ -158,18 +158,25 @@ function inspectConfig({
 			errors.push(`failover fallback route ${target} is not present in enabledModels`);
 		}
 	}
-	if (settings.defaultProjectTrust !== "ask") {
-		errors.push('defaultProjectTrust must be "ask" for explicit project trust');
+	// These three are reported as warnings, not failures: they encode deliberate local choices
+	// (see README). They still surface, so drift stays visible without hiding real errors.
+	const projectTrust = settings.defaultProjectTrust ?? "ask";
+	if (projectTrust === "always") {
+		warnings.push('defaultProjectTrust is "always"; project-local settings, packages, and extensions load without a trust prompt');
 	}
-	if (!Number.isFinite(settings.httpIdleTimeoutMs) || settings.httpIdleTimeoutMs <= 0) {
-		errors.push("httpIdleTimeoutMs must be a finite positive number");
+	if (settings.httpIdleTimeoutMs !== undefined && settings.httpIdleTimeoutMs !== 0) {
+		if (!Number.isFinite(settings.httpIdleTimeoutMs) || settings.httpIdleTimeoutMs < 0) {
+			warnings.push("httpIdleTimeoutMs must be a finite positive number, or 0 to disable the idle timeout");
+		}
+	} else if (settings.httpIdleTimeoutMs === 0) {
+		warnings.push("httpIdleTimeoutMs is 0; the provider HTTP idle timeout is disabled");
 	}
 
 	const malformedPackageEntries = packages.filter((entry) => !packageSource(entry));
 	if (malformedPackageEntries.length) errors.push(`package entries must be strings or objects with a string source (found ${malformedPackageEntries.length})`);
 	const packageSources = packages.map(packageSource).filter(Boolean);
 	const floatingPackages = packageSources.filter((source) => source.startsWith("npm:") && !isPinnedNpm(source));
-	if (floatingPackages.length) errors.push(`unpinned npm packages: ${floatingPackages.join(", ")}`);
+	if (floatingPackages.length) warnings.push(`unpinned npm packages: ${floatingPackages.join(", ")}`);
 	const parsedPackages = packageSources.map(parseNpmSpec).filter(Boolean);
 	const packageCounts = new Map();
 	for (const spec of parsedPackages) packageCounts.set(spec.name, (packageCounts.get(spec.name) ?? 0) + 1);

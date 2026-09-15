@@ -98,8 +98,11 @@ Run the static, offline check after editing configuration:
 npm run check:config
 ```
 
-It validates the default route, exact package pins, role files, trust/network
-bounds, and failover configuration without printing credentials. For an explicit
+It validates the default route, package pins, role files, trust/network bounds,
+and failover configuration without printing credentials. Pin drift, a
+`defaultProjectTrust` of `"always"`, and a disabled HTTP idle timeout are
+reported as warnings rather than failures, so deliberate local choices stay
+visible without masking real errors. For an explicit
 live smoke of the configured default (one provider request), run:
 
 ```bash
@@ -179,8 +182,10 @@ files, and other runtime state.
 
 For Pi settings or custom resources, edit the checked-in files, run
 `npm run check:config`, and rerun `./install.sh`; restart Pi or use `/reload`
-where appropriate. The global project-trust default is `ask`, and provider HTTP
-idle timeout is finite rather than disabled.
+where appropriate. This machine intentionally sets `defaultProjectTrust` to
+`"always"` and `httpIdleTimeoutMs` to `0` (idle timeout disabled); both are
+reported as warnings by the health check rather than failures, and both widen
+trust relative to Pi's defaults.
 
 To update a third-party package, change its exact `npm:...@version` or pinned Git
 commit in `.pi/agent/settings.json`, then run `./install.sh`. To update Pi itself,

@@ -252,12 +252,15 @@ test("unsafe or drifting configuration fails with actionable errors", async () =
 		assert.equal(report.ok, false);
 		const errors = report.errors.join("\n");
 		assert.match(errors, /default route/);
-		assert.match(errors, /defaultProjectTrust/);
-		assert.match(errors, /httpIdleTimeoutMs/);
-		assert.match(errors, /unpinned npm packages/);
 		assert.match(errors, /Anthropic attribution/);
 		assert.match(errors, /stale named subagent overrides/);
 		assert.match(errors, /Reviewer requires tool ls/);
+		// Deliberate local choices surface as warnings so they cannot mask real errors.
+		const warnings = report.warnings.join("\n");
+		assert.match(warnings, /defaultProjectTrust is "always"/);
+		assert.match(warnings, /httpIdleTimeoutMs is 0/);
+		assert.match(warnings, /unpinned npm packages/);
+		assert.doesNotMatch(errors, /defaultProjectTrust|httpIdleTimeoutMs|unpinned npm packages/);
 	} finally {
 		await rm(fixture.root, { recursive: true, force: true });
 	}
