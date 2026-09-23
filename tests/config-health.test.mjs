@@ -43,7 +43,7 @@ const healthySettings = {
 			extensions: ["extensions/background-tasks.ts"],
 		},
 		"npm:@xynogen/pix-pretty@1.22.0",
-		"npm:pi-multi-account@1.21.3",
+		"npm:pi-multi-account@1.22.0",
 		"./pi-config",
 	],
 	defaultProvider: "commandcode",
@@ -185,7 +185,7 @@ test("malformed roots and field types fail without throwing and skip live probes
 		assert.equal(skipped.liveDefault.reason, "static checks failed");
 
 		await writeFile(fixture.settingsPath, JSON.stringify({ ...healthySettings, packages: "not-an-array" }));
-		await writeFile(fixture.failoverPath, JSON.stringify({ ...healthyFailover, providerPriority: "not-an-array", fallbacks: ["not-a-route"], maxAutoContinuesPerPrompt: 8 }));
+		await writeFile(fixture.failoverPath, JSON.stringify({ ...healthyFailover, providerPriority: "not-an-array", fallbacks: ["not-a-route"], maxAutoContinuesPerPrompt: 9 }));
 		const typed = inspectConfig(fixture);
 		assert.equal(typed.ok, false);
 		assert.match(typed.errors.join("\\n"), /packages must be an array/);

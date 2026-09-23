@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.87.0",
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
@@ -17,7 +17,7 @@
     "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
-    "npm:pi-multi-account@1.21.3",
+    "npm:pi-multi-account@1.22.0",
     "npm:pi-powerline-footer@0.17.0",
     "./pi-config",
     {
@@ -28,7 +28,8 @@
     },
     "npm:@xynogen/pix-pretty@1.22.0",
     "npm:pi-devin-local",
-    "npm:pi-provider-qoder"
+    "npm:pi-provider-qoder",
+    "git:github.com/duskoide/pi-herdr-worker"
   ],
   "defaultProvider": "commandcode",
   "defaultModel": "deepseek/deepseek-v4.1-flash",
@@ -45,15 +46,13 @@
     "antigravity/gemini-3.7-flash",
     "antigravity/claude-opus-4-6",
     "antigravity/gemini-3.8-flash",
-    "llama.cpp/tiel-coder-35b",
     "commandcode/z-ai/glm-5.3-flash",
     "commandcode/deepseek/deepseek-v4.1-flash",
     "commandcode/Qwen/Qwen3.8-27B",
     "deepseek/deepseek-flash",
-    "tokenharbor/deepseek-v4-flash",
-    "tokenharbor/glm-5.3-flash",
-    "atria-asi/Atria-Dawn-Preview",
-    "devin/swe-1-6-slow"
+    "commandcode/gpt-5.6-sol",
+    "fuse-local/fuse-2-moe",
+    "llama.cpp/k2-horizon-7b-64k"
   ],
   "tuiMode": "fullscreen",
   "subagents": {
@@ -80,5 +79,10 @@
     "mermaid": "streaming"
   },
   "httpIdleTimeoutMs": 0,
-  "outputPad": 1
+  "outputPad": 1,
+  "herdrWorker": {
+    "workerModel": "openai-codex/gpt-5.6-luna",
+    "workerThinking": "max",
+    "defaultRole": "distributed-coder"
+  }
 }
