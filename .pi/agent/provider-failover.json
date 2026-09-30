@@ -119,7 +119,7 @@
 	"continuationPrompt": "Provider failover activated: switched to {to} after {from} hit a quota or rate limit. Continue the interrupted task from where it stopped. Do not repeat completed work or duplicate actions. The full conversation context is already in this session — just continue working.",
 	"routeCompactionToHealthyAccount": true,
 	"autoRecoverStuck": true,
-	"debugLog": true,
+	"debugLog": false,
 	"preferLatestModel": true,
 	"reasoningLevel": "auto",
 	"preferredModels": {},

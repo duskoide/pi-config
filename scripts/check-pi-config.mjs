@@ -218,7 +218,7 @@ function inspectConfig({
 	}
 	if (failover.autoDiscoverModels !== false) errors.push("autoDiscoverModels must be false; use the checked-in model catalog unless explicitly re-enabled");
 	if (failover.childProxy !== false) errors.push("childProxy must be false to avoid loopback auth shadowing for extension-free children");
-	if (failover.debugLog !== false) warnings.push("debugLog is enabled; provider-failover-debug.log will be written (bounded and rotated)");
+	if (failover.debugLog !== false) errors.push("debugLog must be false to avoid persistent provider-failover logs by default");
 	if (!failoverConsumerConfigured) errors.push("pinned pi-multi-account failover consumer is missing");
 	if (defaultProvider && !providerPriority.includes(defaultProvider)) {
 		if (failover.includeOtherProviders === false && !MANAGED_FAILOVER_GROUPS.has(defaultProvider)) {

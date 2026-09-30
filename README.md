@@ -140,8 +140,12 @@ through the discovery gate. It also keeps `autoDiscoverModels`, `childProxy`, an
 `debugLog` off by default, avoiding the configured live-catalog discovery path,
 loopback auth shadowing, and persistent failover logs. Other
 registration/publication paths may still exist in the extension. It also caps
-automatic continuations at two per prompt. The current Command Code default is
-outside managed account discovery, so production recovery from that route is
+automatic continuations at eight per prompt: pi-multi-account `1.22.0` retries
+transient `5xx`/overload errors against the same provider and model with
+session-local backoff instead of escalating them into the failover ladder, so a
+higher cap no longer multiplies cross-provider switches. The current Command
+Code default is outside managed account discovery, so production recovery from
+that route is
 still unverified. Installing it enables code that reads `auth.json` and may
 update failover state; it fingerprints credentials rather than logging raw keys.
 
