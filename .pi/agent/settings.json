@@ -16,7 +16,7 @@
     "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
-    "npm:pi-multi-account@1.21.3",
+    "npm:pi-multi-account@1.22.0",
     "npm:pi-powerline-footer@0.17.0",
     "./pi-config",
     {
@@ -48,6 +48,7 @@
     "antigravity/gemini-3.8-flash",
     "commandcode/z-ai/glm-5.3-flash",
     "commandcode/deepseek/deepseek-v4.1-flash",
+    "commandcode/Qwen/Qwen3.8-27B",
     "tokenharbor/deepseek-v4-flash",
     "tokenharbor/glm-5.3-flash",
     "qoder/Qwen3.8-Flash",

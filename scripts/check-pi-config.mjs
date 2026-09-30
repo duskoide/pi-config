@@ -23,7 +23,7 @@ const NPM_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-
 const REQUIRED_PACKAGE_VERSIONS = new Map([
 	["pi-background-tasks", "2.5.0"],
 	["@xynogen/pix-pretty", "1.22.0"],
-	["pi-multi-account", "1.21.3"],
+	["pi-multi-account", "1.22.0"],
 ]);
 const MARKER = "PI_CONFIG_HEALTH_OK";
 
@@ -129,8 +129,8 @@ function inspectConfig({
 			errors.push(`${failoverPath}: ${key} must be a boolean`);
 		}
 	}
-	if (failover.maxAutoContinuesPerPrompt !== undefined && (!Number.isInteger(failover.maxAutoContinuesPerPrompt) || failover.maxAutoContinuesPerPrompt < 1 || failover.maxAutoContinuesPerPrompt > 2)) {
-		errors.push(`${failoverPath}: maxAutoContinuesPerPrompt must be an integer from 1 through 2`);
+	if (failover.maxAutoContinuesPerPrompt !== undefined && (!Number.isInteger(failover.maxAutoContinuesPerPrompt) || failover.maxAutoContinuesPerPrompt < 1 || failover.maxAutoContinuesPerPrompt > 8)) {
+		errors.push(`${failoverPath}: maxAutoContinuesPerPrompt must be an integer from 1 through 8`);
 	}
 	const failoverConsumerConfigured = packages.some((entry) => parseNpmSpec(packageSource(entry))?.name === "pi-multi-account");
 	if (settings.subagents !== undefined && (!settings.subagents || typeof settings.subagents !== "object" || Array.isArray(settings.subagents))) {
@@ -218,7 +218,7 @@ function inspectConfig({
 	}
 	if (failover.autoDiscoverModels !== false) errors.push("autoDiscoverModels must be false; use the checked-in model catalog unless explicitly re-enabled");
 	if (failover.childProxy !== false) errors.push("childProxy must be false to avoid loopback auth shadowing for extension-free children");
-	if (failover.debugLog !== false) errors.push("debugLog must be false to avoid persistent provider-failover logs by default");
+	if (failover.debugLog !== false) warnings.push("debugLog is enabled; provider-failover-debug.log will be written (bounded and rotated)");
 	if (!failoverConsumerConfigured) errors.push("pinned pi-multi-account failover consumer is missing");
 	if (defaultProvider && !providerPriority.includes(defaultProvider)) {
 		if (failover.includeOtherProviders === false && !MANAGED_FAILOVER_GROUPS.has(defaultProvider)) {
