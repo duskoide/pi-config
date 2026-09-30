@@ -1,4 +1,13 @@
 {
   "version": 1,
-  "providers": []
+  "providers": [
+    {
+      "name": "atria-asi",
+      "baseUrl": "https://api.atria-asi.ai/v1",
+      "apiKey": "atr_V1EJgXl8E2_yrqzX1oOzRjdq8j2FroHW",
+      "api": "openai-completions",
+      "contextWindow": 128000,
+      "maxTokens": 65536
+    }
+  ]
 }

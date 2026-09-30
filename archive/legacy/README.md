@@ -8,7 +8,7 @@ configuration. They are retained for rollback/reference during this reset:
   `@gotgenes/pi-permission-system` setup.
 - `herdr-permission-bridge.ts` depends on that removed permission event surface.
 - `subagents.json` belongs to the former `@tintinweb/pi-subagents` configuration;
-  current `pi-subagents` settings live in `.pi/agent/settings.json` and agent files.
+  role files are retained under `.pi/agents/`, but this package no longer loads a subagent runner.
 - `pi-better-openai.json` is retained as a disabled machine-local extension config.
 
 Nothing in this directory is referenced by the Pi package manifest.

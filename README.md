@@ -20,7 +20,7 @@ The installer:
 - installs Pi `0.85.1` by default (`PI_VERSION=latest` opts into the latest stable release)
 - installs Herdr from its official installer when it is not already available
 - links the allowlisted files under `.pi/agent/` into `~/.pi/agent`
-- links portable subagent definitions from `.pi/agents/` into `~/.pi/agents/`
+- links retained role definitions from `.pi/agents/` into `~/.pi/agents/`
 - links `.pi/web-search.json` and `herdr/config.toml` into their standard locations
 - installs each pinned npm/Git Pi package listed in `.pi/agent/settings.json`
 - loads the local package containing this repository's custom extensions and skills
@@ -54,41 +54,29 @@ auto-approve them.
 
 ## What is portable
 
-- `.pi/agent/settings.json`: Pi defaults, enabled models, subagent routing, and
-  exact npm/Git package selections
+- `.pi/agent/settings.json`: Pi defaults, enabled models, and exact npm/Git package selections
 - `.pi/agent/keybindings.json` and `.pi/agent/custom-providers.json`
 - legacy user agent definitions under `.pi/agent/agents/` (preserved for compatibility)
-- active `pi-core-subagent` definitions under `.pi/agents/`, linked globally to `~/.pi/agents/`
+- retained role definitions under `.pi/agents/`, linked globally to `~/.pi/agents/`
 - `.pi/agent/pi-searxng-suite.json` and `.pi/agent/provider-failover.json`
-- custom extensions in `extensions/` and the pinned `pi-core-subagent` fork in `vendor/`
+- custom extensions in `extensions/`
 - custom skills in `skills/`
 - `herdr/config.toml`
 
 The `archive/legacy/` directory is retained for rollback/reference only. Nothing
 there is loaded by the package manifest.
 
-## Subagents
+## Retained role definitions
 
-The portable Scout, Researcher, Worker, and Reviewer definitions live in
-`.pi/agents/`. The active subagent extension first matches an exact
-case-insensitive filename stem (for example, `researcher` → `Researcher.md`),
-then falls back to description matching for free-form agent names. Inspect a
-task's reported `agentFile` when testing a new task.
-
-The vendored `pi-core-subagent` fork keeps child extension discovery disabled
-but permits Researcher to request the existing `web_search` and `web_fetch`
-definitions from `@juicesharp/rpiv-web-tools`. No web tools are added to other
-children by default. Run `/web-tools` once on each machine to configure a search
-provider; `web_fetch` itself does not require a search API key.
-
-Named roles use the model in their exact role file as the source of truth. Scout,
-Worker, and Reviewer use the proven Codex route; Researcher uses the proven
-Command Code route and is the only role with web tools. Thinking level is set
-when dispatching: Scout typically uses `low` or `medium`; Researcher, Worker,
-and Reviewer use `high` (or `max` for unusually difficult reviews). Worker must
-be dispatched with `write: true` to receive editing tools and worktree isolation.
-Reviewer is read-only and must be pointed at a checkout containing the change or
-be given its diff and changed-file list.
+Scout, Researcher, Worker, and Reviewer profiles remain in `.pi/agents/` and
+are linked into `~/.pi/agents/` for possible future use. This package no longer
+loads a subagent runner: after a Pi restart, its `subagent` tools and
+`/subagents` command are unavailable. Pi 0.87.1 does not provide a built-in
+replacement. These files record model and tool preferences but do not activate
+runnable agents or grant tool permissions on their own. The existing `subagents`
+settings block is retained but does not activate a runner. If you add another
+runner later, verify its frontmatter support and isolation behavior before
+using these profiles.
 
 ## Health checks and routing
 
@@ -98,7 +86,7 @@ Run the static, offline check after editing configuration:
 npm run check:config
 ```
 
-It validates the default route, package pins, role files, trust/network bounds,
+It validates the default route, package pins, retained role files, trust/network bounds,
 and failover configuration without printing credentials. Pin drift, a
 `defaultProjectTrust` of `"always"`, and a disabled HTTP idle timeout are
 reported as warnings rather than failures, so deliberate local choices stay

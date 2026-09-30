@@ -14,15 +14,11 @@
   ],
   "pi": {
     "extensions": [
-      "./extensions",
-      "./vendor/pi-core-subagent/src/index.ts"
+      "./extensions"
     ],
     "skills": [
       "./skills"
     ]
-  },
-  "dependencies": {
-    "@juicesharp/rpiv-web-tools": "2.9.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-agent-core": "*",

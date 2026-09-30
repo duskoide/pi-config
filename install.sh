@@ -115,7 +115,7 @@ for relative in \
   link_file "$REPO_DIR/.pi/agent/$relative" "$PI_DIR/$relative"
 done
 
-# pi-core-subagent discovers global agent definitions under ~/.pi/agents/.
+# Retain these role definitions in the global agent directory for future compatible runners.
 for agent in Scout Researcher Worker Reviewer; do
   link_file "$REPO_DIR/.pi/agents/${agent}.md" "$PI_HOME_DIR/agents/${agent}.md"
 done
