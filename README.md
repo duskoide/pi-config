@@ -17,7 +17,7 @@ pi
 
 The installer:
 
-- installs Pi `0.85.1` by default (`PI_VERSION=latest` opts into the latest stable release)
+- installs the Pi `latest` dist-tag by default (`PI_VERSION=0.99.1` pins an exact release)
 - installs Herdr from its official installer when it is not already available
 - links the allowlisted files under `.pi/agent/` into `~/.pi/agent`
 - links retained role definitions from `.pi/agents/` into `~/.pi/agents/`
@@ -180,8 +180,10 @@ reported as warnings by the health check rather than failures, and both widen
 trust relative to Pi's defaults.
 
 To update a third-party package, change its exact `npm:...@version` or pinned Git
-commit in `.pi/agent/settings.json`, then run `./install.sh`. To update Pi itself,
-set `PI_VERSION` explicitly or change the default in `install.sh`.
+commit in `.pi/agent/settings.json`, then run `./install.sh`. Pi itself follows the
+`latest` dist-tag on every `./install.sh` run; set `PI_VERSION` to an exact release to
+pin it, or use `pi update --all` to refresh Pi and its packages without reinstalling
+the rest of this configuration.
 
 For Herdr configuration changes, edit `herdr/config.toml` and run:
 

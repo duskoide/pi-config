@@ -4,7 +4,9 @@ set -euo pipefail
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PI_DIR="${PI_CODING_AGENT_DIR:-${HOME}/.pi/agent}"
 PI_HOME_DIR="${PI_HOME_DIR:-${HOME}/.pi}"
-PI_VERSION="${PI_VERSION:-0.85.1}"
+# Pi tracks the published latest dist-tag by default. Set PI_VERSION to an exact
+# release (for example 0.99.1) to pin this machine to a known-good build.
+PI_VERSION="${PI_VERSION:-latest}"
 PI_PACKAGE="@earendil-works/pi-coding-agent"
 HERDR_CONFIG_DIR="${HERDR_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/herdr}"
 SKIP_EXTERNAL_INSTALLS="${PI_CONFIG_SKIP_EXTERNAL_INSTALLS:-0}"

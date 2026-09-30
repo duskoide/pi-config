@@ -66,8 +66,10 @@ package changes are needed. Run `/reload` in Pi to load the new extension.
 
 This uses Pi's verified structured prompt API. On older Pi versions without
 `systemPromptOptions`, it safely does nothing rather than replacing the whole
-prompt. The repository installer currently defaults to Pi 0.85.1; do not assume
-this improvement is enabled there. It is verified against installed Pi 0.99.1.
+prompt. The repository installer now defaults to the Pi `latest` dist-tag, so a fresh
+install picks this up; an installation made when the default was the older 0.85.1 pin
+does not, so do not assume this improvement is enabled there without checking
+`pi --version`. It is verified against installed Pi 0.99.1.
 A later extension forcing a full prompt replacement can also supersede section
 contributions.
 
