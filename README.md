@@ -59,6 +59,7 @@ auto-approve them.
 - legacy user agent definitions under `.pi/agent/agents/` (preserved for compatibility)
 - retained role definitions under `.pi/agents/`, linked globally to `~/.pi/agents/`
 - `.pi/agent/pi-searxng-suite.json` and `.pi/agent/provider-failover.json`
+- `.pi/agent/pi-delegator.json` and its role prompts under `.pi/agent/delegator/`
 - custom extensions in `extensions/`
 - custom skills in `skills/`
 - `herdr/config.toml`
@@ -69,14 +70,78 @@ there is loaded by the package manifest.
 ## Retained role definitions
 
 Scout, Researcher, Worker, and Reviewer profiles remain in `.pi/agents/` and
-are linked into `~/.pi/agents/` for possible future use. This package no longer
-loads a subagent runner: after a Pi restart, its `subagent` tools and
-`/subagents` command are unavailable. Pi 0.87.1 does not provide a built-in
-replacement. These files record model and tool preferences but do not activate
-runnable agents or grant tool permissions on their own. The existing `subagents`
-settings block is retained but does not activate a runner. If you add another
-runner later, verify its frontmatter support and isolation behavior before
-using these profiles.
+are linked into `~/.pi/agents/` for possible future compatible runners. These
+legacy files record model and tool preferences but do not activate runnable
+agents or grant tool permissions on their own. The existing `subagents`
+settings block is retained but is not read by pi-delegator. Neither these files
+nor that settings block controls the `delegate` tool below.
+
+## Delegation
+
+`@mostlyworks/pi-delegator` is pinned to `0.6.6` and provides the `delegate` tool.
+Its managed configuration is `.pi/agent/pi-delegator.json`; the installer links
+it and the `delegator/` prompt directory into `~/.pi/agent/`.
+
+The five standard profiles retain the upstream prompts and tool access. The
+thinking column below describes the upstream baseline, not a restriction on
+interactive customization:
+
+| Profile | Thinking | Tools |
+| --- | --- | --- |
+| `scout` | `low` | read, grep, find, ls |
+| `reviewer` | `high` | read, grep, find, ls, bash |
+| `oracle` | `high` | read, grep, find, ls |
+| `tester` | `high` | read, grep, find, ls, bash |
+| `worker` | `high` | read, grep, find, ls, bash, edit, write |
+
+The starter setup used `model: null` (inherit the active parent model).
+Current model/thinking choices are stored in `.pi/agent/pi-delegator.json` and
+may be customized through the command below. Profiles retain `deadlineMs: null`
+(no overall timer) and empty skills. Explicit child adapters load Qoder and
+optional per-profile initial failover; ambient extensions/skills are not inherited. Reviewer/tester no-edit restrictions are prompt
+instructions, not enforced write protection through Bash.
+
+Use `/delegator-config` (or `/delegator-config oracle`) to interactively choose
+an agent type and choose primary model/thinking or initial fallback settings.
+Primary edits preserve profile capabilities; fallback edits touch only the
+`delegator/failover.json` sidecar. All fallbacks default to disabled: use
+`/delegator-config oracle fallback` to choose one. A switch is allowed once,
+before any output or tool use, for foreground and background agents alike.
+Repository symlinks and the parent's model/thinking remain unchanged. Trusted
+project primary overrides are edited in their own file. Run `/reload` once to discover
+this command in an already-running session; **restart Pi after saving** to apply
+the delegate settings.
+
+After changing profiles, run `npm run check:delegator`, rerun `./install.sh`
+when installing on another machine, and **restart Pi**. The full
+`npm run check:config` includes these checks too. See
+[the configuration guide](docs/pi-delegator.md) for overrides and limitations.
+The vendored prompts retain their upstream MIT license in `delegator/LICENSE`.
+
+### Background agents
+
+The local extension adds `delegate_start`, `delegate_result`, and `delegate_cancel`
+without changing foreground `delegate`. Start several independent profiles and
+let the main session keep working; default hidden completion notifications wake
+a follow-up turn. Progress appears in a single width-aware `Agents` statusline
+below the editor (e.g. `scout:read · reviewer:bash · worker:done`), not repeated
+chat blocks. Its reserved row is independent of Powerline's segment packing.
+Launch/cancel rows stay hidden while collapsed; result retrieval is a single
+compact row with full details available through tool expansion. For example,
+ask Pi to use background scout and reviewer agents.
+
+`delegate_result` without a task ID lists this session's jobs; with an ID it
+returns the answer or a nonblocking not-ready status. Do not poll while default
+notifications are pending. Use disjoint files or separate worktrees for workers
+and parent edits. Jobs are not sandboxed and no worktrees are created automatically.
+
+Jobs and unread results are memory-only and session-scoped. Reload, new/resumed
+sessions, forks, teleport teardown, and orderly quit cancel jobs and await the
+pinned runner's process cleanup; restart does not resume them. At most eight run
+at once and 32 job entries are retained (unread results are never silently evicted).
+Child usage reaches parent totals on the first terminal result retrieval. See
+[the background guide](docs/pi-delegator.md#background-delegation) for schemas,
+limits, cancellation semantics, and safety caveats.
 
 ## Health checks and routing
 

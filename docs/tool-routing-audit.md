@@ -1,5 +1,18 @@
 # Tool routing audit
 
+## Current background-delegation guidance
+
+The audit below is a historical Pi 0.99.1 / `delegate_task` snapshot. The current
+setup also supports `delegate_start`, `delegate_result`, and foreground
+`delegate`. `extensions/tool-routing.ts` has an independent, tool-conditional
+background branch: authorized independent subtasks may be launched as multiple
+`delegate_start` calls in one turn, each returning a task ID immediately. The
+registered tool guidelines explicitly state the eight-active-job limit and
+foreground/background choice. No polling, disjoint write ownership, quiet
+statusline progress, and Main's verification responsibility remain intact.
+Legacy routing and teleport guidance are preserved independently. See
+[the current delegation guide](pi-delegator.md#background-delegation).
+
 ## Findings
 
 Audited the installed Pi 0.99.1 environment, not just package declarations:

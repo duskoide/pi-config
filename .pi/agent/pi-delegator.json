@@ -1,0 +1,84 @@
+{
+  "profiles": {
+    "scout": {
+      "description": "Fast local codebase reconnaissance",
+      "model": "qoder/Qwen3.8-Flash",
+      "thinking": "max",
+      "prompt": "delegator/scout.md",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls"
+      ],
+      "skills": [],
+      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/scout.ts"],
+      "deadlineMs": null
+    },
+    "reviewer": {
+      "description": "Fresh-context correctness and maintainability review",
+      "model": "qoder/GLM-5.3",
+      "thinking": "high",
+      "prompt": "delegator/reviewer.md",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls",
+        "bash"
+      ],
+      "skills": [],
+      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/reviewer.ts"],
+      "deadlineMs": null
+    },
+    "oracle": {
+      "description": "Challenge assumptions and advise on material decisions",
+      "model": "qoder/Qwen3.8-Max",
+      "thinking": "max",
+      "prompt": "delegator/oracle.md",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls"
+      ],
+      "skills": [],
+      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/oracle.ts"],
+      "deadlineMs": null
+    },
+    "tester": {
+      "description": "Exercise a feature's real behavior and report evidence",
+      "model": "qoder/Qwen3.8-Max",
+      "thinking": "high",
+      "prompt": "delegator/tester.md",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls",
+        "bash"
+      ],
+      "skills": [],
+      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/tester.ts"],
+      "deadlineMs": null
+    },
+    "worker": {
+      "description": "Implement one clearly bounded task",
+      "model": "qoder/GLM-5.3-Flash",
+      "thinking": "xhigh",
+      "prompt": "delegator/worker.md",
+      "tools": [
+        "read",
+        "grep",
+        "find",
+        "ls",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "skills": [],
+      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/worker.ts"],
+      "deadlineMs": null
+    }
+  }
+}

@@ -6,8 +6,10 @@
   "scripts": {
     "test": "node --experimental-strip-types --experimental-loader ./tests/pi-test-loader.mjs --test tests/*.test.mjs",
     "check:config": "node scripts/check-pi-config.mjs",
+    "check:delegator": "node scripts/check-pi-delegator.mjs",
     "check:config:live": "node scripts/check-pi-config.mjs --live",
-    "check:failover": "node scripts/check-pi-failover.mjs"
+    "check:failover": "node scripts/check-pi-failover.mjs",
+    "check:agent-failover": "node scripts/check-agent-failover.mjs"
   },
   "keywords": [
     "pi-package"

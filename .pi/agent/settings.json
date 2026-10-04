@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.99.1",
+  "lastChangelogVersion": "1.0.2",
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
@@ -8,7 +8,6 @@
     "npm:@upstash/context7-pi@0.1.2",
     "npm:pi-undo-redo@0.1.1",
     "npm:pi-herdr-sudo-task@0.1.5",
-    "npm:pi-gpt-enhance@0.3.0",
     "npm:@hk_net/pi-usage-bars@0.6.0",
     "npm:@juicesharp/rpiv-ask-user-question@2.9.0",
     "npm:@juicesharp/rpiv-todo@2.9.0",
@@ -16,7 +15,6 @@
     "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
-    "npm:pi-multi-account@1.22.0",
     "npm:pi-powerline-footer@0.17.0",
     "./pi-config",
     {
@@ -26,16 +24,14 @@
       ]
     },
     "npm:@xynogen/pix-pretty@1.22.0",
-    "npm:pi-devin-local",
     "npm:pi-provider-qoder",
     "npm:pi-agent-teleport",
-    "npm:@henryqw/pi-subagent",
-    "npm:@henryqw/pi-task-models",
-    "npm:pi-mcp-adapter"
+    "npm:@mostlyworks/pi-delegator@0.6.6",
+    "npm:pi-gpt-enhance"
   ],
-  "defaultProvider": "commandcode",
-  "defaultModel": "deepseek/deepseek-v4.1-flash",
-  "defaultThinkingLevel": "max",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "xhigh",
   "terminal": {
     "showTerminalProgress": true
   },
@@ -43,27 +39,13 @@
   "quietStartup": true,
   "enabledModels": [
     "openai-codex/gpt-6-astra",
-    "antigravity/gemini-3.7-flash",
-    "antigravity/claude-opus-4-6",
-    "antigravity/gemini-3.8-flash",
-    "commandcode/z-ai/glm-5.3-flash",
-    "commandcode/deepseek/deepseek-v4.1-flash",
-    "commandcode/Qwen/Qwen3.8-27B",
-    "tokenharbor/deepseek-v4-flash",
-    "tokenharbor/glm-5.3-flash",
-    "qoder/Qwen3.8-Flash",
-    "commandcode/zai-org/GLM-5.2",
-    "commandcode/xiaomi/mimo-v2.6-pro",
-    "llama.cpp/k2-horizon-7b-64k",
     "openai-codex/gpt-6-luna",
     "openai-codex/gpt-6-sol",
-    "commandcode/gpt-5.6-sol",
-    "qoder/Kimi-K3",
+    "openai-codex/gpt-6.1-sol",
     "qoder/GLM-5.3",
-    "qoder/Kimi-K2.8-Preview",
-    "qoder/Qwen3.8-Max",
     "qoder/GLM-5.3-Flash",
-    "openai-codex/gpt-6.1-sol"
+    "qoder/Qwen3.8-Max",
+    "qoder/Qwen3.8-Flash"
   ],
   "tuiMode": "fullscreen",
   "subagents": {
@@ -90,5 +72,9 @@
     "mermaid": "streaming"
   },
   "httpIdleTimeoutMs": 0,
-  "outputPad": 1
+  "outputPad": 1,
+  "extensions": [
+    "-builtin:mcp"
+  ],
+  "deviceId": "59baa6d9-2444-4ce8-b064-f70897860bda"
 }

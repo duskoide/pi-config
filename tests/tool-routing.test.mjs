@@ -92,6 +92,53 @@ test("routing preserves the prompt, tool definitions, selection, and other instr
 	assert.equal(event.systemPrompt, "Existing system prompt");
 });
 
+test("active background delegation explicitly permits conditional parallel fan-out", () => {
+	const { handler, event } = setup(["read", "delegate", "delegate_start", "delegate_result", "delegate_cancel"]);
+	handler(event);
+	const guidance = event.systemPromptOptions.sections[section];
+	assert.match(guidance, /authorized work splits into independent subtasks/);
+	assert.match(guidance, /multiple background agents in parallel/);
+	assert.match(guidance, /several delegate_start calls in one turn/);
+	assert.match(guidance, /taskId immediately without waiting for the others or their answers/);
+	assert.match(guidance, /advertised concurrency cap/);
+	assert.match(guidance, /avoid unnecessary paid fan-out/);
+	assert.match(guidance, /respect requests not to delegate/);
+	assert.match(guidance, /foreground delegate when you need its answer before continuing/);
+	assert.match(guidance, /disjoint files or separate worktrees/);
+	assert.match(guidance, /Main remains responsible for tests and integration/);
+	assert.match(guidance, /terminal delegate_result once after/);
+	assert.match(guidance, /rather than polling or sleeping/);
+	assert.match(guidance, /statusline/);
+	assert.doesNotMatch(guidance, /delegate_task|pi-subagent skill|mode isolated|Use teleport/);
+});
+
+test("background routing mentions only available companion tools and removes stale rules", () => {
+	const { handler, event } = setup(["delegate_start"], { project_policy: "Keep this" });
+	handler(event);
+	assert.match(event.systemPromptOptions.sections[section], /multiple background agents/);
+	assert.doesNotMatch(event.systemPromptOptions.sections[section], /foreground delegate|delegate_result/);
+	const first = event.systemPromptOptions.sections[section];
+	handler(event);
+	assert.equal(event.systemPromptOptions.sections[section], first);
+	event.systemPromptOptions.selectedTools = ["teleport"];
+	handler(event);
+	assert.doesNotMatch(event.systemPromptOptions.sections[section], /delegate_start/);
+	assert.match(event.systemPromptOptions.sections[section], /Use teleport/);
+	event.systemPromptOptions.selectedTools = ["read"];
+	handler(event);
+	assert.deepEqual(event.systemPromptOptions.sections, { project_policy: "Keep this" });
+});
+
+test("background, legacy, and teleport routing coexist without duplicate fan-out rules", () => {
+	const { handler, event } = setup(["delegate_start", "delegate_result", "delegate_task", "teleport"]);
+	handler(event);
+	handler(event);
+	const guidance = event.systemPromptOptions.sections[section];
+	assert.equal(guidance.match(/multiple background agents in parallel/g).length, 1);
+	assert.match(guidance, /Use delegate_task proactively/);
+	assert.match(guidance, /Use teleport when continuing work/);
+});
+
 test("older Pi events without structured options are a safe no-op", () => {
 	const { handler } = setup();
 	const event = { systemPrompt: "Existing system prompt" };

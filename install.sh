@@ -112,10 +112,16 @@ for relative in \
   custom-providers.json \
   pi-searxng-suite.json \
   provider-failover.json \
+  pi-delegator.json \
   agents/general-purpose.md \
   agents/Plan.md; do
   link_file "$REPO_DIR/.pi/agent/$relative" "$PI_DIR/$relative"
 done
+
+# Delegate prompts and explicit child adapters resolve relative to PI_DIR.
+# This directory also holds the opt-in per-profile failover sidecar and the
+# upstream prompt license; machine-local provider packages stay in Pi's cache.
+link_path "$REPO_DIR/.pi/agent/delegator" "$PI_DIR/delegator"
 
 # Retain these role definitions in the global agent directory for future compatible runners.
 for agent in Scout Researcher Worker Reviewer; do

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { inspectDelegatorConfig } from "./check-pi-delegator.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_SETTINGS = join(REPO_ROOT, ".pi", "agent", "settings.json");
@@ -99,6 +100,7 @@ function inspectConfig({
 	settingsPath = DEFAULT_SETTINGS,
 	failoverPath = DEFAULT_FAILOVER,
 	agentsDir = DEFAULT_AGENTS,
+	delegatorPath = join(dirname(settingsPath), "pi-delegator.json"),
 } = {}) {
 	const errors = [];
 	const warnings = [];
@@ -175,6 +177,13 @@ function inspectConfig({
 	const malformedPackageEntries = packages.filter((entry) => !packageSource(entry));
 	if (malformedPackageEntries.length) errors.push(`package entries must be strings or objects with a string source (found ${malformedPackageEntries.length})`);
 	const packageSources = packages.map(packageSource).filter(Boolean);
+	const delegatorConfigured = packageSources.some((source) => rawNpmName(source) === "@mostlyworks/pi-delegator");
+	let delegator;
+	if (delegatorConfigured || existsSync(delegatorPath)) {
+		delegator = inspectDelegatorConfig({ configPath: delegatorPath });
+		errors.push(...delegator.errors);
+		if (!delegatorConfigured) warnings.push("pi-delegator.json exists but @mostlyworks/pi-delegator is not configured in packages");
+	}
 	const floatingPackages = packageSources.filter((source) => source.startsWith("npm:") && !isPinnedNpm(source));
 	if (floatingPackages.length) warnings.push(`unpinned npm packages: ${floatingPackages.join(", ")}`);
 	const parsedPackages = packageSources.map(parseNpmSpec).filter(Boolean);
@@ -287,6 +296,7 @@ function inspectConfig({
 			defaultProjectTrust: settings.defaultProjectTrust ?? null,
 			packageCount: packages.length,
 			floatingPackages,
+			delegator: delegator ? { configured: delegatorConfigured, ...delegator.checks } : null,
 			failoverConsumerConfigured,
 			failoverOrder,
 			providerPriority,
@@ -513,6 +523,7 @@ async function main(argv) {
 		console.log(`Pi config health: ${report.ok && (!live || report.liveDefault.ok) ? "PASS" : "FAIL"}`);
 		console.log(`  default: ${report.checks.defaultRoute} (${report.checks.defaultThinkingLevel ?? "unspecified"})`);
 		console.log(`  packages: ${report.checks.packageCount}; floating: ${report.checks.floatingPackages.length}`);
+		if (report.checks.delegator) console.log(`  delegator profiles: ${report.checks.delegator.enabledProfiles.join(", ") || "none"}${report.checks.delegator.configured ? "" : " (package not configured)"}`);
 		console.log(`  failover consumer (configured): ${report.checks.failoverConsumerConfigured ? "pi-multi-account" : "missing"}`);
 		console.log(`  failover order: ${report.checks.failoverOrder.join(" -> ") || "none"}`);
 		console.log(`  explicit fallbacks: ${report.checks.fallbacks.join(" -> ") || "none"}`);
