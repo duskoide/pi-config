@@ -5,14 +5,11 @@ import { tmpdir } from "node:os";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
-import { inspectDelegatorConfig } from "./check-pi-delegator.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_SETTINGS = join(REPO_ROOT, ".pi", "agent", "settings.json");
-const DEFAULT_FAILOVER = join(REPO_ROOT, ".pi", "agent", "provider-failover.json");
 const DEFAULT_AGENTS = join(REPO_ROOT, ".pi", "agents");
 const ROLE_NAMES = ["scout", "researcher", "worker", "reviewer"];
-const MANAGED_FAILOVER_GROUPS = new Set(["anthropic", "openai-codex", "kimi-coding", "cursor", "qwen", "ollama"]);
 const ROLE_TOOL_REQUIREMENTS = {
 	Scout: { required: ["read", "grep", "find", "ls"], forbidden: ["bash", "edit", "write", "web_search", "web_fetch"] },
 	Researcher: { required: ["web_search", "web_fetch"], forbidden: ["read", "grep", "find", "ls", "bash", "edit", "write"] },
@@ -24,7 +21,6 @@ const NPM_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-
 const REQUIRED_PACKAGE_VERSIONS = new Map([
 	["pi-background-tasks", "2.5.0"],
 	["@xynogen/pix-pretty", "1.22.0"],
-	["pi-multi-account", "1.22.0"],
 ]);
 const MARKER = "PI_CONFIG_HEALTH_OK";
 
@@ -98,22 +94,16 @@ function parseFrontmatter(text) {
 
 function inspectConfig({
 	settingsPath = DEFAULT_SETTINGS,
-	failoverPath = DEFAULT_FAILOVER,
 	agentsDir = DEFAULT_AGENTS,
-	delegatorPath = join(dirname(settingsPath), "pi-delegator.json"),
 } = {}) {
 	const errors = [];
 	const warnings = [];
 	const settings = readJson(settingsPath, errors);
-	const failover = readJson(failoverPath, errors);
 	const packages = arrayField(settings, "packages", errors, settingsPath);
 	const enabledModels = stringArrayField(settings, "enabledModels", errors, settingsPath);
 	const defaultProvider = typeof settings.defaultProvider === "string" ? settings.defaultProvider : "";
 	const defaultModel = typeof settings.defaultModel === "string" ? settings.defaultModel : "";
 	const defaultRoute = defaultProvider && defaultModel ? `${defaultProvider}/${defaultModel}` : "";
-	const failoverOrder = stringArrayField(failover, "providerOrder", errors, failoverPath);
-	const providerPriority = stringArrayField(failover, "providerPriority", errors, failoverPath);
-	const fallbacks = stringArrayField(failover, "fallbacks", errors, failoverPath);
 	if (settings.defaultProvider !== undefined && typeof settings.defaultProvider !== "string") {
 		errors.push(`${settingsPath}: defaultProvider must be a string`);
 	}
@@ -126,15 +116,6 @@ function inspectConfig({
 	if (settings.defaultProjectTrust !== undefined && typeof settings.defaultProjectTrust !== "string") {
 		errors.push(`${settingsPath}: defaultProjectTrust must be a string`);
 	}
-	for (const key of ["enabled", "autoContinue", "autoDiscover", "autoDiscoverModels", "includeQwen", "includeOllama", "includeCursor", "includeOtherProviders", "childProxy", "debugLog"]) {
-		if (failover[key] !== undefined && typeof failover[key] !== "boolean") {
-			errors.push(`${failoverPath}: ${key} must be a boolean`);
-		}
-	}
-	if (failover.maxAutoContinuesPerPrompt !== undefined && (!Number.isInteger(failover.maxAutoContinuesPerPrompt) || failover.maxAutoContinuesPerPrompt < 1 || failover.maxAutoContinuesPerPrompt > 8)) {
-		errors.push(`${failoverPath}: maxAutoContinuesPerPrompt must be an integer from 1 through 8`);
-	}
-	const failoverConsumerConfigured = packages.some((entry) => parseNpmSpec(packageSource(entry))?.name === "pi-multi-account");
 	if (settings.subagents !== undefined && (!settings.subagents || typeof settings.subagents !== "object" || Array.isArray(settings.subagents))) {
 		errors.push(`${settingsPath}: subagents must be an object`);
 	}
@@ -149,16 +130,6 @@ function inspectConfig({
 	if (!defaultRoute) errors.push("defaultProvider and defaultModel must both be set");
 	if (defaultRoute && !enabledModels.includes(defaultRoute)) {
 		errors.push(`default route ${defaultRoute} is not present in enabledModels`);
-	}
-	const duplicateFallbacks = fallbacks.filter((target, index) => fallbacks.indexOf(target) !== index);
-	if (duplicateFallbacks.length) errors.push(`duplicate failover fallback routes: ${[...new Set(duplicateFallbacks)].join(", ")}`);
-	for (const target of fallbacks) {
-		const slash = target.indexOf("/");
-		if (slash <= 0 || slash === target.length - 1) {
-			errors.push(`failover fallback route is malformed: ${target}`);
-		} else if (!enabledModels.includes(target)) {
-			errors.push(`failover fallback route ${target} is not present in enabledModels`);
-		}
 	}
 	// These three are reported as warnings, not failures: they encode deliberate local choices
 	// (see README). They still surface, so drift stays visible without hiding real errors.
@@ -177,13 +148,6 @@ function inspectConfig({
 	const malformedPackageEntries = packages.filter((entry) => !packageSource(entry));
 	if (malformedPackageEntries.length) errors.push(`package entries must be strings or objects with a string source (found ${malformedPackageEntries.length})`);
 	const packageSources = packages.map(packageSource).filter(Boolean);
-	const delegatorConfigured = packageSources.some((source) => rawNpmName(source) === "@mostlyworks/pi-delegator");
-	let delegator;
-	if (delegatorConfigured || existsSync(delegatorPath)) {
-		delegator = inspectDelegatorConfig({ configPath: delegatorPath });
-		errors.push(...delegator.errors);
-		if (!delegatorConfigured) warnings.push("pi-delegator.json exists but @mostlyworks/pi-delegator is not configured in packages");
-	}
 	const floatingPackages = packageSources.filter((source) => source.startsWith("npm:") && !isPinnedNpm(source));
 	if (floatingPackages.length) warnings.push(`unpinned npm packages: ${floatingPackages.join(", ")}`);
 	const parsedPackages = packageSources.map(parseNpmSpec).filter(Boolean);
@@ -221,39 +185,6 @@ function inspectConfig({
 		}
 	}
 
-	if (!failover.enabled) warnings.push("provider failover is disabled");
-	if (failover.includeOtherProviders !== false) {
-		errors.push("includeOtherProviders must be false to keep automatic failover from spending undisclosed API-key providers");
-	}
-	if (failover.autoDiscoverModels !== false) errors.push("autoDiscoverModels must be false; use the checked-in model catalog unless explicitly re-enabled");
-	if (failover.childProxy !== false) errors.push("childProxy must be false to avoid loopback auth shadowing for extension-free children");
-	if (failover.debugLog !== false) errors.push("debugLog must be false to avoid persistent provider-failover logs by default");
-	if (!failoverConsumerConfigured) errors.push("pinned pi-multi-account failover consumer is missing");
-	if (defaultProvider && !providerPriority.includes(defaultProvider)) {
-		if (failover.includeOtherProviders === false && !MANAGED_FAILOVER_GROUPS.has(defaultProvider)) {
-			warnings.push(`default provider ${defaultProvider} is outside managed failover discovery; only explicit fallback routes cover cross-provider recovery`);
-		} else {
-			errors.push(`failover providerPriority omits default provider ${defaultProvider}`);
-		}
-	}
-	const openaiIndex = providerPriority.indexOf("openai");
-	const codexIndex = providerPriority.indexOf("openai-codex");
-	if (openaiIndex >= 0 && codexIndex >= 0 && openaiIndex < codexIndex) {
-		errors.push("unverified openai must not precede proven openai-codex in providerPriority");
-	}
-	const invalidManagedGroups = failoverOrder.filter((provider) => !MANAGED_FAILOVER_GROUPS.has(provider));
-	if (invalidManagedGroups.length) {
-		errors.push(`failover providerOrder contains unmanaged groups: ${invalidManagedGroups.join(", ")}`);
-	}
-	if (failover.includeOtherProviders !== false) {
-		for (const provider of ["deepseek", "tokenharbor", "openai-codex"]) {
-			if (!providerPriority.includes(provider)) warnings.push(`failover providerPriority omits proven route ${provider}`);
-		}
-	}
-	if (fallbacks.length === 0) {
-		if (failoverConsumerConfigured) warnings.push("explicit fallbacks is empty; pi-multi-account uses its dynamic account/model rotation");
-		else warnings.push("failover fallbacks is empty; runtime fallback behavior still requires a verified consumer");
-	}
 	if (namedOverrides.length) {
 		errors.push(`stale named subagent overrides remain: ${namedOverrides.join(", ")}`);
 	}
@@ -296,18 +227,6 @@ function inspectConfig({
 			defaultProjectTrust: settings.defaultProjectTrust ?? null,
 			packageCount: packages.length,
 			floatingPackages,
-			delegator: delegator ? { configured: delegatorConfigured, ...delegator.checks } : null,
-			failoverConsumerConfigured,
-			failoverOrder,
-			providerPriority,
-			fallbackCount: fallbacks.length,
-			fallbacks,
-			failoverPolicy: {
-				includeOtherProviders: failover.includeOtherProviders ?? null,
-				autoDiscoverModels: failover.autoDiscoverModels ?? null,
-				childProxy: failover.childProxy ?? null,
-				debugLog: failover.debugLog ?? null,
-			},
 			roles,
 		},
 	};
@@ -439,7 +358,7 @@ function runBounded(command, args, { cwd, env, input, timeoutMs = 120_000, maxBu
 function installedConfigMatches() {
 	const agentDir = process.env.PI_CODING_AGENT_DIR || join(process.env.HOME || process.env.USERPROFILE || "", ".pi", "agent");
 	if (!agentDir) return false;
-	for (const [installed, source] of [[join(agentDir, "settings.json"), DEFAULT_SETTINGS], [join(agentDir, "provider-failover.json"), DEFAULT_FAILOVER]]) {
+	for (const [installed, source] of [[join(agentDir, "settings.json"), DEFAULT_SETTINGS]]) {
 		try {
 			if (readFileSync(installed, "utf8") !== readFileSync(source, "utf8")) return false;
 		} catch {
@@ -474,12 +393,12 @@ async function liveDefaultCheck(route, thinking) {
 		`Reply with exactly ${MARKER} and nothing else.`,
 	];
 	if (!installedConfigMatches()) {
-		return { ok: false, exitCode: null, timedOut: false, skipped: true, reason: "installed Pi settings/failover do not match this checkout" };
+		return { ok: false, exitCode: null, timedOut: false, skipped: true, reason: "installed Pi settings do not match this checkout" };
 	}
 	const cwd = mkdtempSync(join(tmpdir(), "pi-config-health-live-"));
 	try {
 		// Keep sessions and generated files out of the checkout, while using the installed agent
-		// directory for the exact settings/failover files and machine-local auth/catalog state.
+		// directory for the exact settings file and machine-local auth/catalog state.
 		const agentDir = process.env.PI_CODING_AGENT_DIR || join(process.env.HOME || process.env.USERPROFILE || "", ".pi", "agent");
 		const env = { ...process.env, PI_CODING_AGENT_DIR: agentDir };
 		const result = await runBounded("pi", args, {
@@ -523,12 +442,6 @@ async function main(argv) {
 		console.log(`Pi config health: ${report.ok && (!live || report.liveDefault.ok) ? "PASS" : "FAIL"}`);
 		console.log(`  default: ${report.checks.defaultRoute} (${report.checks.defaultThinkingLevel ?? "unspecified"})`);
 		console.log(`  packages: ${report.checks.packageCount}; floating: ${report.checks.floatingPackages.length}`);
-		if (report.checks.delegator) console.log(`  delegator profiles: ${report.checks.delegator.enabledProfiles.join(", ") || "none"}${report.checks.delegator.configured ? "" : " (package not configured)"}`);
-		console.log(`  failover consumer (configured): ${report.checks.failoverConsumerConfigured ? "pi-multi-account" : "missing"}`);
-		console.log(`  failover order: ${report.checks.failoverOrder.join(" -> ") || "none"}`);
-		console.log(`  explicit fallbacks: ${report.checks.fallbacks.join(" -> ") || "none"}`);
-		console.log(`  provider priority: ${report.checks.providerPriority.join(" -> ") || "none"}`);
-		console.log(`  failover policy: managed-only=${report.checks.failoverPolicy.includeOtherProviders === false ? "yes" : "no"}; catalog discovery=${report.checks.failoverPolicy.autoDiscoverModels === false ? "off" : "on"}; child proxy=${report.checks.failoverPolicy.childProxy === false ? "off" : "on"}; debug log=${report.checks.failoverPolicy.debugLog === false ? "off" : "on"}`);
 		for (const [role, details] of Object.entries(report.checks.roles)) console.log(`  ${role}: ${details.model}`);
 		for (const warning of report.warnings) console.log(`WARN: ${warning}`);
 		for (const error of report.errors) console.log(`ERROR: ${error}`);

@@ -19,19 +19,17 @@ const roleTools = {
 	Reviewer: "read, grep, find, ls",
 };
 
-async function makeFixture(settings, failover) {
+async function makeFixture(settings) {
 	const root = await mkdtemp(join(tmpdir(), "pi-config-health-"));
 	const agents = join(root, "agents");
 	await mkdir(agents, { recursive: true });
 	await writeFile(join(root, "settings.json"), `${JSON.stringify(settings, null, 2)}\n`);
-	await writeFile(join(root, "failover.json"), `${JSON.stringify(failover, null, 2)}\n`);
 	for (const [name, model] of Object.entries(roleModels)) {
 		await writeFile(join(agents, `${name}.md`), `---\ndescription: ${name} role\nmodel: ${model}\ntools: ${roleTools[name]}\n---\n`);
 	}
 	return {
 		root,
 		settingsPath: join(root, "settings.json"),
-		failoverPath: join(root, "failover.json"),
 		agentsDir: agents,
 	};
 }
@@ -43,7 +41,6 @@ const healthySettings = {
 			extensions: ["extensions/background-tasks.ts"],
 		},
 		"npm:@xynogen/pix-pretty@1.22.0",
-		"npm:pi-multi-account@1.22.0",
 		"./pi-config",
 	],
 	defaultProvider: "commandcode",
@@ -54,21 +51,8 @@ const healthySettings = {
 	enabledModels: [
 		"commandcode/deepseek/deepseek-v4.1-flash",
 		"deepseek/deepseek-flash",
-		"tokenharbor/deepseek-v4-flash",
 	],
 	subagents: { agentOverrides: { oracle: { model: "openai-codex/gpt-5.6-sol" } } },
-};
-
-const healthyFailover = {
-	enabled: true,
-	autoDiscoverModels: false,
-	includeOtherProviders: false,
-	childProxy: false,
-	debugLog: false,
-	providerOrder: ["openai-codex"],
-	providerPriority: ["deepseek", "tokenharbor"],
-	fallbacks: ["deepseek/deepseek-flash", "tokenharbor/deepseek-v4-flash"],
-	maxAutoContinuesPerPrompt: 2,
 };
 
 test("pinned npm detection accepts only exact semver package specs", () => {
@@ -143,25 +127,12 @@ test("live parser rejects prompt echoes and accepts the exact routed response", 
 	assert.match(toolResult.reason, /tool calls/);
 });
 
-test("provider priority keeps proven Codex ahead of unverified OpenAI", async () => {	const fixture = await makeFixture(healthySettings, {
-		...healthyFailover,
-		providerPriority: ["commandcode", "deepseek", "tokenharbor", "openai", "openai-codex"],
-	});
-	try {
-		const report = inspectConfig(fixture);
-		assert.equal(report.ok, false);
-		assert.match(report.errors.join("\\n"), /unverified openai must not precede proven openai-codex/);
-	} finally {
-		await rm(fixture.root, { recursive: true, force: true });
-	}
-});
-
 test("lookalike package names do not satisfy required package checks", async () => {
 	const fixture = await makeFixture({
 		...healthySettings,
 		packages: healthySettings.packages.filter((entry) => !String(typeof entry === "string" ? entry : entry.source).includes("pi-background-tasks"))
 			.concat("npm:pi-background-tasks-extra@2.5.0"),
-	}, healthyFailover);
+	});
 	try {
 		const report = inspectConfig(fixture);
 		assert.equal(report.ok, false);
@@ -173,10 +144,9 @@ test("lookalike package names do not satisfy required package checks", async () 
 });
 
 test("malformed roots and field types fail without throwing and skip live probes", async () => {
-	const fixture = await makeFixture(healthySettings, healthyFailover);
+	const fixture = await makeFixture(healthySettings);
 	try {
 		await writeFile(fixture.settingsPath, "null\n");
-		await writeFile(fixture.failoverPath, "[]\n");
 		const malformed = inspectConfig(fixture);
 		assert.equal(malformed.ok, false);
 		assert.match(malformed.errors.join("\\n"), /JSON root must be an object/);
@@ -185,49 +155,30 @@ test("malformed roots and field types fail without throwing and skip live probes
 		assert.equal(skipped.liveDefault.reason, "static checks failed");
 
 		await writeFile(fixture.settingsPath, JSON.stringify({ ...healthySettings, packages: "not-an-array" }));
-		await writeFile(fixture.failoverPath, JSON.stringify({ ...healthyFailover, providerPriority: "not-an-array", fallbacks: ["not-a-route"], maxAutoContinuesPerPrompt: 9 }));
 		const typed = inspectConfig(fixture);
 		assert.equal(typed.ok, false);
 		assert.match(typed.errors.join("\\n"), /packages must be an array/);
-		assert.match(typed.errors.join("\\n"), /providerPriority must be an array/);
-		assert.match(typed.errors.join("\\n"), /failover fallback route is malformed/);
-		assert.match(typed.errors.join("\\n"), /maxAutoContinuesPerPrompt must be an integer/);
 	} finally {
 		await rm(fixture.root, { recursive: true, force: true });
 	}
 });
 
-test("healthy configuration passes static checks with a managed-only rotation warning", async () => {
-	const fixture = await makeFixture(healthySettings, healthyFailover);
+test("healthy configuration passes static checks", async () => {
+	const fixture = await makeFixture(healthySettings);
 	try {
 		const report = inspectConfig(fixture);
 		assert.equal(report.ok, true);
 		assert.deepEqual(report.errors, []);
-		assert.doesNotMatch(report.warnings.join("\n"), /explicit fallbacks is empty/);
-		assert.match(report.warnings.join("\n"), /default provider commandcode is outside managed failover discovery/);
-		assert.equal(report.checks.fallbackCount, 2);
 		assert.equal(report.checks.defaultRoute, "commandcode/deepseek/deepseek-v4.1-flash");
 	} finally {
 		await rm(fixture.root, { recursive: true, force: true });
 	}
 });
 
-test("repository failover routes deprioritize Codex and target the DeepSeek-family routes", () => {
+test("repository configuration passes the static health check", () => {
 	const report = inspectConfig();
-	// providerOrder is only a sequence preference: pi-multi-account re-appends every unlisted
-	// managed family, so it cannot exclude openai-codex. providerPriority is the ordered ladder
-	// that actually decides cross-provider selection, and unlisted providers sort last.
-	assert.deepEqual(report.checks.providerPriority, ["deepseek", "tokenharbor"]);
-	assert.ok(
-		!report.checks.providerPriority.includes("openai-codex"),
-		"providerPriority must not rank openai-codex, whose family auto-selects the sol flagship",
-	);
-	assert.ok(
-		!report.checks.providerPriority.includes("anthropic"),
-		"providerPriority must not rank anthropic, which has no credential",
-	);
-	assert.deepEqual(report.checks.fallbacks, ["tokenharbor/deepseek-v4-flash", "commandcode/Qwen/Qwen3.8-27B"]);
-	assert.equal(report.checks.failoverPolicy.includeOtherProviders, false);
+	assert.deepEqual(report.errors, []);
+	assert.equal(report.ok, true);
 });
 
 test("unsafe or drifting configuration fails with actionable errors", async () => {
@@ -244,7 +195,6 @@ test("unsafe or drifting configuration fails with actionable errors", async () =
 			enabledModels: [],
 			subagents: { agentOverrides: { scout: { model: "llama.cpp/tiel-coder-35b" } } },
 		},
-		{ enabled: true, providerOrder: ["deepseek"], fallbacks: [] },
 	);
 	try {
 		await writeFile(join(fixture.agentsDir, "Reviewer.md"), "---\ndescription: Reviewer role\nmodel: openai-codex/gpt-5.6-luna\ntools: read, grep, find\n---\n");
