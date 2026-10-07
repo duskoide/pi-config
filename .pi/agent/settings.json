@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.4",
+  "lastChangelogVersion": "1.1.0",
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
@@ -15,7 +15,6 @@
     "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
-    "npm:pi-powerline-footer@0.17.0",
     "./pi-config",
     {
       "source": "npm:pi-background-tasks@2.5.0",
@@ -46,9 +45,9 @@
     "atria-asi/Atria-Dawn-Preview",
     "qoder/Kimi-K2.8-Preview",
     "qoder/DeepSeek-Flash",
-    "anthropic/claude-haiku-4-5",
     "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-opus-5-5"
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-haiku-5-5"
   ],
   "tuiMode": "fullscreen",
   "fullscreenCopyOnSelect": true,
