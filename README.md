@@ -52,25 +52,6 @@ Each package's transitive dependency lock remains in Pi's local package cache.
 npm may report pending native install scripts; this installer does not
 auto-approve them.
 
-## Pig ports
-
-A separate port of the currently selected extensions is in [`pig/`](pig/README.md).
-It uses Pig 0.3.1's supported Node extension runtime, with private source copies,
-Pig-specific filesystem/child-process adapters, and a pinned dependency lock.
-The existing Pi setup is not modified, and credentials are not migrated.
-
-```bash
-npm run pig:install -- --from-pi-cache
-npm run pig:test
-npm run pig:smoke
-pig
-```
-
-Read the [port limitations](pig/README.md#important-differences-and-limits) before
-using it: local read-only delegation replaces the unsupported Herdr agent
-transport; checked isolated graphs and Pi-specific attestation are not exposed.
-The smoke test uses an ephemeral configuration and a loopback model fixture.
-
 ## What is portable
 
 - `.pi/agent/settings.json`: Pi defaults, enabled models, and exact npm/Git package selections

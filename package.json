@@ -9,11 +9,7 @@
     "check:delegator": "node scripts/check-pi-delegator.mjs",
     "check:config:live": "node scripts/check-pi-config.mjs --live",
     "check:failover": "node scripts/check-pi-failover.mjs",
-    "check:agent-failover": "node scripts/check-agent-failover.mjs",
-    "pig:install": "node scripts/install-pig.mjs",
-    "pig:test": "node --test tests/pig-port.test.mjs",
-    "pig:smoke": "node scripts/check-pig-ports.mjs",
-    "pig:editor-smoke": "node scripts/check-pig-editor.mjs"
+    "check:agent-failover": "node scripts/check-agent-failover.mjs"
   },
   "keywords": [
     "pi-package"
