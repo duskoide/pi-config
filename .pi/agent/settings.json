@@ -26,12 +26,12 @@
     "npm:@xynogen/pix-pretty@1.22.0",
     "npm:pi-provider-qoder",
     "npm:pi-agent-teleport",
-    "npm:@mostlyworks/pi-delegator@0.6.6",
-    "npm:@gotgenes/pi-anthropic-auth"
+    "npm:@gotgenes/pi-anthropic-auth",
+    "npm:pi-optchat"
   ],
-  "defaultProvider": "qoder",
-  "defaultModel": "GLM-5.3-Flash",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-5-5",
+  "defaultThinkingLevel": "high",
   "terminal": {
     "showTerminalProgress": true
   },
@@ -50,24 +50,10 @@
     "anthropic/claude-opus-5-5"
   ],
   "tuiMode": "fullscreen",
-  "subagents": {
-    "defaultModel": "openai-codex/gpt-5.6-luna",
-    "defaultThinking": "max",
-    "agentOverrides": {
-      "oracle": {
-        "model": "openai-codex/gpt-5.6-sol",
-        "thinking": "high"
-      },
-      "advisor": {
-        "model": "openai-codex/gpt-6-astra",
-        "thinking": "low"
-      }
-    }
-  },
   "fullscreenCopyOnSelect": true,
   "fullscreenExitOutput": "resume-hint",
   "treeFilterMode": "default",
-  "doubleEscapeAction": "tree",
+  "doubleEscapeAction": "none",
   "collapseChangelog": true,
   "showCacheMissNotices": true,
   "markdown": {
@@ -78,5 +64,8 @@
   "extensions": [
     "-builtin:mcp"
   ],
-  "deviceId": "59baa6d9-2444-4ce8-b064-f70897860bda"
+  "deviceId": "59baa6d9-2444-4ce8-b064-f70897860bda",
+  "warnings": {
+    "anthropicExtraUsage": false
+  }
 }
