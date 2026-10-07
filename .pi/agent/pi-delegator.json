@@ -12,7 +12,10 @@
         "ls"
       ],
       "skills": [],
-      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/scout.ts"],
+      "extensions": [
+        "delegator/qoder-provider.ts",
+        "delegator/runtime/scout.ts"
+      ],
       "deadlineMs": null
     },
     "reviewer": {
@@ -28,7 +31,10 @@
         "bash"
       ],
       "skills": [],
-      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/reviewer.ts"],
+      "extensions": [
+        "delegator/qoder-provider.ts",
+        "delegator/runtime/reviewer.ts"
+      ],
       "deadlineMs": null
     },
     "oracle": {
@@ -43,13 +49,16 @@
         "ls"
       ],
       "skills": [],
-      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/oracle.ts"],
+      "extensions": [
+        "delegator/qoder-provider.ts",
+        "delegator/runtime/oracle.ts"
+      ],
       "deadlineMs": null
     },
     "tester": {
       "description": "Exercise a feature's real behavior and report evidence",
-      "model": "qoder/Qwen3.8-Max",
-      "thinking": "high",
+      "model": "qoder/DeepSeek-Flash",
+      "thinking": "max",
       "prompt": "delegator/tester.md",
       "tools": [
         "read",
@@ -59,7 +68,10 @@
         "bash"
       ],
       "skills": [],
-      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/tester.ts"],
+      "extensions": [
+        "delegator/qoder-provider.ts",
+        "delegator/runtime/tester.ts"
+      ],
       "deadlineMs": null
     },
     "worker": {
@@ -77,7 +89,10 @@
         "write"
       ],
       "skills": [],
-      "extensions": ["delegator/qoder-provider.ts", "delegator/runtime/worker.ts"],
+      "extensions": [
+        "delegator/qoder-provider.ts",
+        "delegator/runtime/worker.ts"
+      ],
       "deadlineMs": null
     }
   }

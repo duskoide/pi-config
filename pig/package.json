@@ -1,0 +1,30 @@
+{
+  "name": "pig-port-dependencies",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned source dependencies for the private Pig ports; install with ../scripts/install-pig.mjs",
+  "dependencies": {
+    "@pi-archimedes/image-paste": "2.5.1",
+    "pi-antigravity": "0.7.2",
+    "@ff-labs/pi-fff": "0.10.6",
+    "@upstash/context7-pi": "0.1.2",
+    "pi-undo-redo": "0.1.1",
+    "pi-herdr-sudo-task": "0.1.5",
+    "@hk_net/pi-usage-bars": "0.6.0",
+    "@juicesharp/rpiv-ask-user-question": "2.9.0",
+    "@juicesharp/rpiv-todo": "2.9.0",
+    "@juicesharp/rpiv-web-tools": "2.9.0",
+    "@juicesharp/rpiv-advisor": "2.9.0",
+    "@juicesharp/rpiv-btw": "2.9.0",
+    "pi-commandcode-provider": "0.6.4",
+    "pi-powerline-footer": "0.17.0",
+    "pi-background-tasks": "2.5.0",
+    "@xynogen/pix-pretty": "1.22.0",
+    "pi-provider-qoder": "0.4.7",
+    "pi-agent-teleport": "0.2.4",
+    "@henryqw/pi-subagent": "25.0.2",
+    "@henryqw/pi-task-models": "7.0.5",
+    "pi-gpt-enhance": "0.3.0",
+    "typebox": "1.3.27"
+  }
+}

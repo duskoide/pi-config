@@ -38,7 +38,8 @@ type = "plugin_action"
 command = "persiyanov.reviewr.toggle"   # <plugin_id>.<action_id> — note the id, not the name
 
 [terminal]
-shell_mode="login"
+default_shell = "/home/pn/.nix-profile/bin/zsh"
+shell_mode = "login"
 
 [theme]
 name = "nord"

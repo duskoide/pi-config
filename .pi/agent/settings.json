@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.2",
+  "lastChangelogVersion": "1.0.4",
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
@@ -27,10 +27,10 @@
     "npm:pi-provider-qoder",
     "npm:pi-agent-teleport",
     "npm:@mostlyworks/pi-delegator@0.6.6",
-    "npm:pi-gpt-enhance"
+    "npm:@gotgenes/pi-anthropic-auth"
   ],
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6.1-sol",
+  "defaultProvider": "qoder",
+  "defaultModel": "GLM-5.3-Flash",
   "defaultThinkingLevel": "xhigh",
   "terminal": {
     "showTerminalProgress": true
@@ -38,14 +38,16 @@
   "defaultProjectTrust": "always",
   "quietStartup": true,
   "enabledModels": [
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6-sol",
-    "openai-codex/gpt-6.1-sol",
     "qoder/GLM-5.3",
     "qoder/GLM-5.3-Flash",
     "qoder/Qwen3.8-Max",
-    "qoder/Qwen3.8-Flash"
+    "qoder/Qwen3.8-Flash",
+    "atria-asi/Atria-Dawn-Preview",
+    "qoder/Kimi-K2.8-Preview",
+    "qoder/DeepSeek-Flash",
+    "anthropic/claude-haiku-4-5",
+    "anthropic/claude-sonnet-5-5",
+    "anthropic/claude-opus-5-5"
   ],
   "tuiMode": "fullscreen",
   "subagents": {
