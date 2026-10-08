@@ -25,13 +25,15 @@
     "npm:@xynogen/pix-pretty@1.22.0",
     "npm:pi-provider-qoder",
     "npm:pi-agent-teleport",
-    "npm:@gotgenes/pi-anthropic-auth",
-    "npm:pi-optchat"
+    "npm:@mostlyworks/pi-delegator@0.6.6",
+    "npm:@gotgenes/pi-anthropic-auth"
   ],
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",
   "defaultThinkingLevel": "high",
-  "defaultTools": ["+codemode"],
+  "defaultTools": [
+    "+codemode"
+  ],
   "terminal": {
     "showTerminalProgress": true
   },
@@ -67,5 +69,19 @@
   "deviceId": "59baa6d9-2444-4ce8-b064-f70897860bda",
   "warnings": {
     "anthropicExtraUsage": false
+  },
+  "subagents": {
+    "defaultModel": "openai-codex/gpt-5.6-luna",
+    "defaultThinking": "max",
+    "agentOverrides": {
+      "oracle": {
+        "model": "openai-codex/gpt-5.6-sol",
+        "thinking": "high"
+      },
+      "advisor": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "low"
+      }
+    }
   }
 }

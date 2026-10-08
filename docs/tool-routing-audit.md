@@ -11,7 +11,7 @@ registered tool guidelines explicitly state the eight-active-job limit and
 foreground/background choice. No polling, disjoint write ownership, quiet
 statusline progress, and Main's verification responsibility remain intact.
 Legacy routing and teleport guidance are preserved independently. See
-[the archived delegation guide](../archive/removed-delegators/docs/pi-delegator.md#background-delegation).
+[the current delegation guide](pi-delegator.md#background-delegation).
 
 ## Findings
 
