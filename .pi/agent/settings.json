@@ -83,5 +83,10 @@
         "thinking": "low"
       }
     }
+  },
+  "modelThinkingLevels": {
+    "anthropic/claude-sonnet-5-5": "medium",
+    "anthropic/claude-haiku-5-5": "high",
+    "anthropic/claude-opus-5-5": "low"
   }
 }
