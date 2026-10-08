@@ -111,7 +111,6 @@ for relative in \
   keybindings.json \
   custom-providers.json \
   pi-searxng-suite.json \
-  provider-failover.json \
   pi-delegator.json \
   agents/general-purpose.md \
   agents/Plan.md; do
