@@ -17,7 +17,8 @@ function routingGuidance(selectedTools: readonly string[]): string {
 
 	if (selectedTools.includes("delegate_start")) {
 		rules.push(
-			"When authorized work splits into independent subtasks, you may launch multiple background agents in parallel: issue several delegate_start calls in one turn. Each returns a taskId immediately without waiting for the others or their answers; stay within the advertised concurrency cap. Keep trivial or tightly coupled work local, avoid unnecessary paid fan-out, and respect requests not to delegate.",
+			"Use subagents proactively; do not wait for the user to ask. Delegate early for unfamiliar-code exploration, multi-file investigations, independent review of your changes, and running/verifying behavior. Default to delegating nontrivial work that has a bounded, self-contained outcome; keep only trivial or tightly coupled steps local.",
+			"When authorized work splits into independent subtasks, launch multiple background agents in parallel: issue several delegate_start calls in one turn. Each returns a taskId immediately without waiting for the others or their answers; stay within the advertised concurrency cap. Keep trivial or tightly coupled work local, avoid unnecessary paid fan-out, and respect requests not to delegate.",
 			"Give each background agent a bounded, self-contained task, allowed scope, exclusions, and expected evidence. The parent can continue complementary work while agents run; concurrent writers must own disjoint files or separate worktrees, and the parent must not mutate an agent's read-only scope while it is being inspected. No automatic worktree or sandbox is created. Main remains responsible for tests and integration.",
 			"Agent progress belongs in the statusline; avoid routine launch/completion narration in chat. After launching, continue useful independent work or yield to completion notifications rather than polling or sleeping.",
 		);
@@ -27,6 +28,13 @@ function routingGuidance(selectedTools: readonly string[]): string {
 		if (selectedTools.includes("delegate_result")) {
 			rules.push("Retrieve each terminal delegate_result once after its completion notification. Running results are point-in-time observations, not a waiting primitive; do not poll them to wait.");
 		}
+	}
+
+	if (selectedTools.includes("ask_advisor")) {
+		rules.push(
+			"Use ask_advisor proactively at decision points, not only when stuck: before committing to a non-obvious plan or architecture, when two or more approaches look viable, after repeated failed attempts or surprising results, and before declaring a meaningful change complete (pass a concise draft naming work, validation, and remaining risks).",
+			"Treat advisor output as strong guidance to weigh against evidence, not as verification. If you deviate from its advice, say why. Use followUpTo to drill into an answer instead of starting a new consultation. Skip the advisor for trivial or purely mechanical tasks.",
+		);
 	}
 
 	if (selectedTools.includes("teleport")) {
