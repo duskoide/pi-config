@@ -180,7 +180,7 @@ async function installerFixture(t) {
 	const home = join(directory, "home");
 	const assets = [
 		"install.sh", "package.json", "herdr/config.toml", ".pi/web-search.json",
-		".pi/agent/keybindings.json", ".pi/agent/custom-providers.json",
+		".pi/agent/keybindings.json", ".pi/agent/custom-providers.json", ".pi/agent/models.json",
 		".pi/agent/pi-searxng-suite.json", ".pi/agent/agents", ".pi/agents",
 		".pi/agent/pi-delegator.json", ".pi/agent/delegator",
 		"extensions/delegator-failover", "extensions/delegator-config/failover-config.ts",
