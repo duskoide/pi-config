@@ -110,6 +110,7 @@ for relative in \
   settings.json \
   keybindings.json \
   custom-providers.json \
+  models.json \
   pi-searxng-suite.json \
   pi-delegator.json \
   agents/general-purpose.md \

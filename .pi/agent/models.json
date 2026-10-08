@@ -1,0 +1,238 @@
+{
+  "providers": {
+    "openai-codex": {
+      "modelOverrides": {
+        "gpt-5.3-codex-spark": {
+          "contextWindow": 1000000
+        },
+        "gpt-5.5": {
+          "contextWindow": 1000000
+        },
+        "gpt-5.6-luna": {
+          "contextWindow": 1000000
+        },
+        "gpt-5.6-sol": {
+          "contextWindow": 1000000
+        },
+        "gpt-5.6-terra": {
+          "contextWindow": 1000000
+        },
+        "gpt-6-astra": {
+          "contextWindow": 1000000
+        },
+        "gpt-6-luna": {
+          "contextWindow": 1000000
+        },
+        "gpt-6-sol": {
+          "contextWindow": 1000000
+        },
+        "gpt-6.1-sol": {
+          "contextWindow": 1000000
+        }
+      }
+    },
+    "kimi-coding-account-2": {
+      "api": "anthropic-messages",
+      "baseUrl": "https://api.kimi.com/coding",
+      "models": [
+        {
+          "id": "k3",
+          "name": "Kimi K3",
+          "api": "anthropic-messages",
+          "baseUrl": "https://api.kimi.com/coding",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 3,
+            "output": 15,
+            "cacheRead": 0.3,
+            "cacheWrite": 0
+          },
+          "contextWindow": 1048576,
+          "maxTokens": 131072,
+          "compat": {
+            "allowEmptySignature": true,
+            "forceAdaptiveThinking": true
+          }
+        },
+        {
+          "id": "k3-256k",
+          "name": "Kimi K3-256K",
+          "api": "anthropic-messages",
+          "baseUrl": "https://api.kimi.com/coding",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 262144,
+          "maxTokens": 131072,
+          "compat": {
+            "forceAdaptiveThinking": true
+          }
+        },
+        {
+          "id": "kimi-for-coding",
+          "name": "Kimi K2.7 Code",
+          "api": "anthropic-messages",
+          "baseUrl": "https://api.kimi.com/coding",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.95,
+            "output": 4,
+            "cacheRead": 0.19,
+            "cacheWrite": 0
+          },
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "compat": {
+            "allowEmptySignature": true,
+            "forceAdaptiveThinking": true
+          }
+        },
+        {
+          "id": "kimi-for-coding-highspeed",
+          "name": "Kimi For Coding HighSpeed",
+          "api": "anthropic-messages",
+          "baseUrl": "https://api.kimi.com/coding",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 1.9,
+            "output": 8,
+            "cacheRead": 0.38,
+            "cacheWrite": 0
+          },
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "compat": {
+            "forceAdaptiveThinking": true
+          }
+        }
+      ]
+    },
+    "qoder": {
+      "modelOverrides": {
+        "Auto": {
+          "contextWindow": 400000
+        },
+        "Cantus": {
+          "contextWindow": 400000
+        },
+        "DeepSeek-V4-Flash": {
+          "contextWindow": 400000
+        },
+        "DeepSeek-Flash": {
+          "contextWindow": 400000
+        },
+        "DeepSeek-V4-Pro": {
+          "contextWindow": 400000
+        },
+        "Efficient": {
+          "contextWindow": 400000
+        },
+        "GLM-5.2": {
+          "contextWindow": 400000
+        },
+        "GLM-5.3": {
+          "contextWindow": 400000
+        },
+        "GLM-5.3-Flash": {
+          "contextWindow": 400000
+        },
+        "Kimi-K2.7-Code": {
+          "contextWindow": 400000
+        },
+        "Kimi-K2.8-Preview": {
+          "contextWindow": 400000
+        },
+        "Kimi-K3": {
+          "contextWindow": 400000
+        },
+        "Lite": {
+          "contextWindow": 400000
+        },
+        "MiniMax-M2.7": {
+          "contextWindow": 400000
+        },
+        "MiniMax-M3": {
+          "contextWindow": 400000
+        },
+        "Performance": {
+          "contextWindow": 400000
+        },
+        "Qwen3.6-Flash": {
+          "contextWindow": 400000
+        },
+        "Qwen3.7-Max": {
+          "contextWindow": 400000
+        },
+        "Qwen3.7-Plus": {
+          "contextWindow": 400000
+        },
+        "Qwen3.7Plus": {
+          "contextWindow": 400000
+        },
+        "Qwen3.8-Max": {
+          "contextWindow": 400000
+        },
+        "Qwen3.8-Flash": {
+          "contextWindow": 400000
+        },
+        "Sonus": {
+          "contextWindow": 400000
+        },
+        "Ultimate": {
+          "contextWindow": 400000
+        }
+      }
+    },
+    "anthropic": {
+      "modelOverrides": {
+        "claude-opus-5-5": {
+          "contextWindow": 400000
+        },
+        "claude-sonnet-5-5": {
+          "contextWindow": 400000
+        },
+        "claude-haiku-5-5": {
+          "contextWindow": 100000
+        }
+      }
+    }
+  }
+}
