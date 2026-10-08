@@ -9,15 +9,11 @@
     "npm:pi-undo-redo@0.1.1",
     "npm:pi-herdr-sudo-task@0.1.5",
     "npm:@hk_net/pi-usage-bars@0.6.0",
-    "npm:@juicesharp/rpiv-ask-user-question@2.9.0",
-    "npm:@juicesharp/rpiv-todo@2.9.0",
-    "npm:@juicesharp/rpiv-web-tools@2.9.0",
-    "npm:@juicesharp/rpiv-advisor@2.9.0",
     "npm:@juicesharp/rpiv-btw@2.9.0",
     "npm:pi-commandcode-provider@0.6.4",
     "./pi-config",
     {
-      "source": "npm:pi-background-tasks@2.5.0",
+      "source": "npm:pi-background-tasks@latest",
       "extensions": [
         "extensions/background-tasks.ts"
       ]
@@ -26,7 +22,11 @@
     "npm:pi-provider-qoder",
     "npm:pi-agent-teleport",
     "npm:@mostlyworks/pi-delegator@0.6.6",
-    "npm:@gotgenes/pi-anthropic-auth"
+    "npm:@gotgenes/pi-anthropic-auth",
+    "npm:pi-advisor-flow",
+    "npm:@zhushanwen/pi-ask-user",
+    "npm:@tintinweb/pi-tasks",
+    "npm:pi-web-research"
   ],
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",

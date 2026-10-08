@@ -1,0 +1,104 @@
+diff -ru /tmp/pwr-src-orig/config.ts ./config.ts
+--- /tmp/pwr-src-orig/config.ts	2026-10-08 12:13:54.713630627 +0700
++++ ./config.ts	2026-10-08 12:13:54.873114304 +0700
+@@ -44,6 +44,7 @@
+   kagiV0Endpoint?: string; // legacy v0 endpoint (GET). Global-only.
+   wynaApiKey?: string; // Wyna API key override (normally read from models.json / WYNA_API_KEY). Global-only.
+   wynaEndpoint?: string; // Wyna search endpoint. Global-only.
++  searxngUrl?: string; // SearXNG base URL (local patch). Global-only.
+   searchProvider?: string; // "kagi" (=v1, default) | "kagi-v0" (legacy) | "wyna". Selects the backend. Global-only.
+   maxResults?: number;
+   perPageMaxChars?: number;
+@@ -82,7 +83,7 @@
+   acceptLanguage?: string; // Accept-Language header for the plain-fetch path
+ }
+ 
+-export const DEFAULTS: Required<Omit<WebSearchConfig, "kagiToken" | "kagiV0Token" | "wynaApiKey">> = {
++export const DEFAULTS: Required<Omit<WebSearchConfig, "kagiToken" | "kagiV0Token" | "wynaApiKey" | "searxngUrl">> = {
+   kagiEndpoint: "https://kagi.com/api/v1/search",
+   kagiV0Endpoint: "https://kagi.com/api/v0/search",
+   wynaEndpoint: "https://ai.wyna.info/api/search",
+diff -ru /tmp/pwr-src-orig/index.ts ./index.ts
+--- /tmp/pwr-src-orig/index.ts	2026-10-08 12:13:54.713871388 +0700
++++ ./index.ts	2026-10-08 12:13:54.876096842 +0700
+@@ -60,6 +60,9 @@
+   agentDir?: string,
+ ): { label: string; token?: string; envVar: string; endpoint: string } {
+   const name = resolveEffectiveProviderName(cfg, agentDir);
++  if (name === "searxng") {
++    return { label: "searxng", token: "-", envVar: "", endpoint: cfg.searxngUrl ?? "" };
++  }
+   if (name === "wyna") {
+     return {
+       label: "wyna",
+diff -ru /tmp/pwr-src-orig/search/search.ts ./search/search.ts
+--- /tmp/pwr-src-orig/search/search.ts	2026-10-08 12:13:54.714289465 +0700
++++ ./search/search.ts	2026-10-08 12:13:54.874646736 +0700
+@@ -22,6 +22,7 @@
+ } from "../config.ts";
+ import { kagiSearch, kagiSearchV1 } from "./kagi.ts";
+ import { wynaSearchGet } from "./wyna.ts";
++import { searxngSearch } from "./searxng.ts";
+ 
+ /** A normalized search hit, provider-agnostic. */
+ export interface SearchResult {
+@@ -57,6 +58,7 @@
+ 
+ /** True when ANY search credential (Kagi v1, Kagi v0, or Wyna) is available. */
+ export function hasAnySearchCredential(cfg: WebSearchConfig, agentDir?: string): boolean {
++  if (cfg.searchProvider?.trim().toLowerCase() === "searxng" && cfg.searxngUrl?.trim()) return true;
+   return !!(resolveToken(cfg) || resolveTokenV0(cfg) || resolveWynaApiKey(cfg, agentDir));
+ }
+ 
+@@ -236,6 +238,11 @@
+   // Nothing configured at all: return the unified setup briefing so the agent
+   // knows exactly what's missing and can finish setup with the user. (With an
+   // explicit searchProvider, the provider-specific message below is more targeted.)
++  if (cfg.searchProvider?.trim().toLowerCase() === "searxng") {
++    const base = cfg.searxngUrl?.trim();
++    if (!base) throw new SearchConfigError("searxngUrl missing in global config.json", "no-token");
++    return { name: "searxng", search: (q, n, signal) => searxngSearch(q, n, base, signal) };
++  }
+   if (!cfg.searchProvider?.trim() && !hasAnySearchCredential(cfg, agentDir)) {
+     throw new SearchConfigError(setupBriefing(cfg, agentDir), "no-token");
+   }
+Only in ./search: searxng.ts
+diff -ru /tmp/pwr-src-orig/summarizer.ts ./summarizer.ts
+--- /tmp/pwr-src-orig/summarizer.ts	2026-10-08 12:13:54.714958354 +0700
++++ ./summarizer.ts	2026-10-08 12:21:32.138218787 +0700
+@@ -18,7 +18,6 @@
+  */
+ 
+ import {
+-  AuthStorage,
+   createAgentSession,
+   DefaultResourceLoader,
+   getAgentDir,
+@@ -362,11 +361,12 @@
+   const { session } = await createAgentSession({
+     cwd: opts.cwd,
+     model: opts.model,
++    // pi 1.1 compat: reuse the parent's ModelRuntime so extension-registered providers (e.g. qoder) resolve.
++    // eslint-disable-next-line @typescript-eslint/no-explicit-any
++    modelRuntime: (opts.modelRegistry as any)?.runtime,
+     // Summarization is extraction, not reasoning: keep it off for speed/cost.
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     thinkingLevel: (opts.thinkingLevel ?? "off") as any,
+-    authStorage: AuthStorage.create(),
+-    modelRegistry: opts.modelRegistry,
+     // With tools: expose ONLY our custom tool(s) via the allowlist (built-ins
+     // stay off because they're not listed). Without: no tools at all.
+     ...(hasTools ? { customTools: tools, tools: tools.map((t) => t.name) } : { noTools: "all" as const }),
+diff -ru /tmp/pwr-src-orig/tools.ts ./tools.ts
+--- /tmp/pwr-src-orig/tools.ts	2026-10-08 12:13:54.715252773 +0700
++++ ./tools.ts	2026-10-08 12:19:01.462199968 +0700
+@@ -622,7 +622,8 @@
+               });
+               const text = `${out}\n\n${sourcesListFor([asResult(page)])}\n_Single source — verify high-salience claims independently. Cite claims from this page by copying this verbatim: ${citationFor(asResult(page))}_`;
+               return { content: [{ type: "text", text }], details };
+-            } catch {
++            } catch (err) {
++              try { (await import("node:fs")).appendFileSync("/tmp/pwr-err.log", String((err as any)?.stack || err) + "\n"); } catch {}
+               // fall through to full markdown on sub-agent failure
+             }
+           }
