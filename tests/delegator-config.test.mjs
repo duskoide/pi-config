@@ -47,7 +47,7 @@ test("managed profiles retain standard capabilities and accept customized model/
 		assert.equal(entry.deadlineMs, null);
 		assert.deepEqual(entry.tools, tools);
 		assert.deepEqual(entry.skills, []);
-		assert.deepEqual(entry.extensions, ["delegator/qoder-provider.ts", `delegator/runtime/${name}.ts`]);
+		assert.deepEqual(entry.extensions, ["delegator/qoder-provider.ts", "delegator/anthropic-auth.ts", `delegator/runtime/${name}.ts`]);
 		assert.equal(entry.prompt, `delegator/${name}.md`);
 		const prompt = await readFile(join(root, ".pi/agent", entry.prompt), "utf8");
 		assert.match(prompt, new RegExp(`You are the ${name} delegate`));

@@ -14,6 +14,7 @@
       "skills": [],
       "extensions": [
         "delegator/qoder-provider.ts",
+        "delegator/anthropic-auth.ts",
         "delegator/runtime/scout.ts"
       ],
       "deadlineMs": null
@@ -33,6 +34,7 @@
       "skills": [],
       "extensions": [
         "delegator/qoder-provider.ts",
+        "delegator/anthropic-auth.ts",
         "delegator/runtime/reviewer.ts"
       ],
       "deadlineMs": null
@@ -51,6 +53,7 @@
       "skills": [],
       "extensions": [
         "delegator/qoder-provider.ts",
+        "delegator/anthropic-auth.ts",
         "delegator/runtime/oracle.ts"
       ],
       "deadlineMs": null
@@ -70,14 +73,15 @@
       "skills": [],
       "extensions": [
         "delegator/qoder-provider.ts",
+        "delegator/anthropic-auth.ts",
         "delegator/runtime/tester.ts"
       ],
       "deadlineMs": null
     },
     "worker": {
       "description": "Implement one clearly bounded task",
-      "model": "qoder/GLM-5.3-Flash",
-      "thinking": "xhigh",
+      "model": "anthropic/claude-haiku-5-5",
+      "thinking": "max",
       "prompt": "delegator/worker.md",
       "tools": [
         "read",
@@ -91,6 +95,7 @@
       "skills": [],
       "extensions": [
         "delegator/qoder-provider.ts",
+        "delegator/anthropic-auth.ts",
         "delegator/runtime/worker.ts"
       ],
       "deadlineMs": null
