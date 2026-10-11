@@ -5,7 +5,6 @@
     "npm:@pi-archimedes/image-paste@2.5.1",
     "npm:pi-antigravity@0.7.2",
     "npm:@ff-labs/pi-fff@0.10.6",
-    "npm:@upstash/context7-pi@0.1.2",
     "npm:pi-undo-redo@0.1.1",
     "npm:pi-herdr-sudo-task@0.1.5",
     "npm:@hk_net/pi-usage-bars@0.6.0",
@@ -18,19 +17,20 @@
         "extensions/background-tasks.ts"
       ]
     },
-    "npm:@xynogen/pix-pretty@1.22.0",
     "npm:pi-provider-qoder",
-    "npm:pi-agent-teleport",
     "npm:@mostlyworks/pi-delegator@0.6.6",
     "npm:@gotgenes/pi-anthropic-auth",
     "npm:pi-advisor-flow",
     "npm:@zhushanwen/pi-ask-user",
     "npm:@tintinweb/pi-tasks",
-    "npm:pi-web-research"
+    "npm:pi-web-access",
+    "npm:pi-cache-optimizer",
+    "npm:pi-powerline-footer",
+    "npm:@monotykamary/pi-vcc"
   ],
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-sonnet-5-5",
-  "defaultThinkingLevel": "medium",
+  "defaultModel": "claude-opus-5-5",
+  "defaultThinkingLevel": "high",
   "defaultTools": [
     "+codemode"
   ],
@@ -44,7 +44,6 @@
     "qoder/GLM-5.3-Flash",
     "qoder/Qwen3.8-Max",
     "qoder/Qwen3.8-Flash",
-    "atria-asi/Atria-Dawn-Preview",
     "qoder/Kimi-K2.8-Preview",
     "qoder/DeepSeek-Flash",
     "anthropic/claude-sonnet-5-5",
@@ -88,5 +87,8 @@
     "anthropic/claude-sonnet-5-5": "medium",
     "anthropic/claude-haiku-5-5": "high",
     "anthropic/claude-opus-5-5": "low"
+  },
+  "codemode": {
+    "mode": "only"
   }
 }
