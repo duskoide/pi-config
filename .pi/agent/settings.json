@@ -61,6 +61,11 @@
     "mermaid": "streaming"
   },
   "httpIdleTimeoutMs": 0,
+  "idleCompact": {
+    "enabled": true,
+    "minutes": 10,
+    "minTokens": 50000
+  },
   "outputPad": 1,
   "extensions": [
     "-builtin:mcp"
