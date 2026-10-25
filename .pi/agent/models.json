@@ -145,6 +145,16 @@
         }
       ]
     },
+    "deepseek": {
+       "compat": {
+         "sendSessionAffinityHeaders": true
+        }
+    },
+    "moonshotai": {
+       "compat": {
+         "sendSessionAffinityHeaders": true
+       }
+    },
     "qoder": {
       "modelOverrides": {
         "Auto": {

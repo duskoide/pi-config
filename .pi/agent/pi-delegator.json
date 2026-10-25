@@ -2,8 +2,8 @@
   "profiles": {
     "scout": {
       "description": "Fast local codebase reconnaissance",
-      "model": "qoder/Qwen3.8-Flash",
-      "thinking": "max",
+      "model": "anthropic/claude-haiku-5-5",
+      "thinking": "low",
       "prompt": "delegator/scout.md",
       "tools": [
         "read",
@@ -21,8 +21,8 @@
     },
     "reviewer": {
       "description": "Fresh-context correctness and maintainability review",
-      "model": "qoder/GLM-5.3",
-      "thinking": "high",
+      "model": "anthropic/claude-haiku-5-5",
+      "thinking": "max",
       "prompt": "delegator/reviewer.md",
       "tools": [
         "read",
@@ -41,8 +41,8 @@
     },
     "oracle": {
       "description": "Challenge assumptions and advise on material decisions",
-      "model": "qoder/Qwen3.8-Max",
-      "thinking": "max",
+      "model": "anthropic/claude-opus-5-5",
+      "thinking": "low",
       "prompt": "delegator/oracle.md",
       "tools": [
         "read",
@@ -60,8 +60,8 @@
     },
     "tester": {
       "description": "Exercise a feature's real behavior and report evidence",
-      "model": "qoder/DeepSeek-Flash",
-      "thinking": "max",
+      "model": "anthropic/claude-sonnet-5-5",
+      "thinking": "medium",
       "prompt": "delegator/tester.md",
       "tools": [
         "read",
