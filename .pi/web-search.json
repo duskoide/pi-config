@@ -1,15 +1,15 @@
 {
   "workflow": "none",
-  "searxngBaseUrl": "http://100.64.0.0:8888",
+  "searxngBaseUrl": "http://proxmox:8082",
   "ssrf": {
     "allowRanges": [
-      "100.64.0.0/32"
+      "100.72.3.47/32"
     ]
   },
   "toolActivation": "eager",
   "fetch": {
-    "answerProvider": "qoder",
-    "answerModel": "Qwen3.8-Flash"
+    "answerProvider": "deepseek",
+    "answerModel": "deepseek-flash"
   },
   "webSearch": {
     "allowedProviders": [

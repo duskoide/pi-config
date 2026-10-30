@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.1.0",
+  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
   "packages": [
     "npm:@pi-archimedes/image-paste@2.5.1",
@@ -26,11 +26,12 @@
     "npm:pi-web-access",
     "npm:pi-cache-optimizer",
     "npm:pi-powerline-footer",
-    "npm:@monotykamary/pi-vcc"
+    "npm:@monotykamary/pi-vcc",
+    "git:github.com/duskoide/pi-profiles"
   ],
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-5-5",
-  "defaultThinkingLevel": "high",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
+  "defaultThinkingLevel": "xhigh",
   "defaultTools": [
     "+codemode"
   ],
@@ -40,15 +41,13 @@
   "defaultProjectTrust": "always",
   "quietStartup": true,
   "enabledModels": [
-    "qoder/GLM-5.3",
-    "qoder/GLM-5.3-Flash",
-    "qoder/Qwen3.8-Max",
-    "qoder/Qwen3.8-Flash",
-    "qoder/Kimi-K2.8-Preview",
-    "qoder/DeepSeek-Flash",
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-opus-5-5",
-    "anthropic/claude-haiku-5-5"
+    "anthropic/claude-haiku-5-5",
+    "llama.cpp/flint-apex",
+    "deepseek/deepseek-flash",
+    "moonshotai/kimi-k3.1-pro",
+    "llama.cpp/cyber-tiel"
   ],
   "tuiMode": "fullscreen",
   "fullscreenCopyOnSelect": true,
@@ -65,6 +64,9 @@
     "enabled": true,
     "minutes": 10,
     "minTokens": 50000
+  },
+  "undoRedo": {
+    "gitTimeoutMs": 5000
   },
   "outputPad": 1,
   "extensions": [
@@ -91,7 +93,8 @@
   "modelThinkingLevels": {
     "anthropic/claude-sonnet-5-5": "medium",
     "anthropic/claude-haiku-5-5": "high",
-    "anthropic/claude-opus-5-5": "low"
+    "anthropic/claude-opus-5-5": "low",
+    "deepseek/deepseek-flash": "max"
   },
   "codemode": {
     "mode": "only"
