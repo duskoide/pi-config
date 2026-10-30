@@ -109,6 +109,7 @@ mkdir -p "$PI_DIR" "$PI_HOME_DIR"
 for relative in \
   settings.json \
   keybindings.json \
+  APPEND_SYSTEM.md \
   custom-providers.json \
   models.json \
   pi-searxng-suite.json \
