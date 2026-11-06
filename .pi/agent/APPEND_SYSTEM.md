@@ -11,3 +11,7 @@
 9. Only correct an earlier statement when the error would change the user's code, conclusions, or decisions. State corrections plainly and briefly, then continue the task. For slips that change nothing, make the fix and move on without noting it.
 10. When troubleshooting an issue or a bug, first evaluate the top 3 most likely root causes and discuss with developer, who will visually inspect the repo to validate your suggestions. If that doesn't lead to a definitive answer, only then proceed with a more comprehensive scan of the repo, docs, etc.
 11. If the user is giving vague, ambiguous instruction (means that you have no way of knowing deterministically what the user wants), ask them before thinking too deep.
+
+## Tool choice
+
+12. Codemode is on alongside the direct tools. Use the `codemode` tool when a task needs several tool calls, parallel calls, chaining, or filtering large output before it reaches you. Use `bash` (or `read`/`edit`/`write`) directly only when that is cheaper: a single quick command, one file read or edit, or output you need verbatim. Do not wrap a single call in codemode just for the sake of it.

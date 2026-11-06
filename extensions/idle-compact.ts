@@ -76,7 +76,7 @@ function compactNow(ctx: ExtensionContext, config: IdleCompactConfig): void {
 }
 
 export default function idleCompact(pi: ExtensionAPI): void {
-	// Per-runtime state: two runtimes can share this process (subagents, delegator).
+	// Per-runtime state: two runtimes can share this process (subagents).
 	let timer: ReturnType<typeof setTimeout> | null = null;
 	let unsubscribeTerminalInput: (() => void) | undefined;
 

@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "providers": []
+  "providers": [
+    {
+      "name": "strata",
+      "baseUrl": "http://endeavour:8080/v1",
+      "apiKey": "sk-strata-p_DhCn4yzE901gypfIU1c5AUv42z0n56",
+      "api": "openai-completions"
+    }
+  ]
 }

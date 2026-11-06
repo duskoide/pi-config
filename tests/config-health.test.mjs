@@ -127,7 +127,7 @@ test("live parser rejects prompt echoes and accepts the exact routed response", 
 	assert.match(toolResult.reason, /tool calls/);
 });
 
-test("lookalike package names do not satisfy required package checks", async () => {
+test("lookalike package names are not mistaken for pi-background-tasks", async () => {
 	const fixture = await makeFixture({
 		...healthySettings,
 		packages: healthySettings.packages.filter((entry) => !String(typeof entry === "string" ? entry : entry.source).includes("pi-background-tasks"))
@@ -135,9 +135,7 @@ test("lookalike package names do not satisfy required package checks", async () 
 	});
 	try {
 		const report = inspectConfig(fixture);
-		assert.equal(report.ok, false);
-		assert.match(report.errors.join("\\n"), /required package is missing: npm:pi-background-tasks@2.5.0/);
-		assert.match(report.errors.join("\\n"), /exactly one pinned pi-background-tasks package is required/);
+		assert.equal(report.ok, true, report.errors.join("; "));
 	} finally {
 		await rm(fixture.root, { recursive: true, force: true });
 	}

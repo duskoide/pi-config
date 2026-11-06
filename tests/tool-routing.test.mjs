@@ -19,124 +19,98 @@ function setup(selectedTools = [], sections = {}) {
 			systemPromptOptions: {
 				selectedTools,
 				sections,
-				toolSnippets: { delegate_task: "Existing snippet" },
-				toolGuidelines: { delegate_task: ["Existing safety rule"] },
+				toolSnippets: { bash: "Existing snippet" },
+				toolGuidelines: { bash: ["Existing safety rule"] },
 				promptGuidelines: ["Existing global rule"],
 			},
 		},
 	};
 }
 
-test("active delegation gets proactive triggers and existing safety boundaries", () => {
-	const { handler, event } = setup(["read", "delegate_task"]);
-	assert.equal(handler(event), undefined);
-	const guidance = event.systemPromptOptions.sections[section];
-	assert.match(guidance, /Use delegate_task proactively/);
-	assert.match(guidance, /early bounded scout/);
-	assert.match(guidance, /independent delegate_task reviewer/);
-	assert.match(guidance, /user requests no delegation/);
-	assert.match(guidance, /trivial tasks local/);
-	assert.match(guidance, /complementary work rather than duplicating/);
-	assert.match(guidance, /instead of polling or sleeping/);
-	assert.match(guidance, /pi-subagent skill/);
-	assert.match(guidance, /mode direct only for read-only/);
-	assert.match(guidance, /mode isolated for implementation or any writing/);
-	assert.match(guidance, /preserve existing authorization and check\/integration requirements/);
-	assert.doesNotMatch(guidance, /Use teleport/);
+function withHc(value, fn) {
+	const prev = process.env.HC_TERMINAL_ID;
+	if (value === undefined) delete process.env.HC_TERMINAL_ID;
+	else process.env.HC_TERMINAL_ID = value;
+	try {
+		fn();
+	} finally {
+		if (prev === undefined) delete process.env.HC_TERMINAL_ID;
+		else process.env.HC_TERMINAL_ID = prev;
+	}
+}
+
+test("inside hc, delegation guidance steers to hc-spawned pi instances", () => {
+	withHc("t1", () => {
+		const { handler, event } = setup(["read", "bash"]);
+		assert.equal(handler(event), undefined);
+		const guidance = event.systemPromptOptions.sections[section];
+		assert.match(guidance, /spawning interactive pi instances in herdr-core terminals/);
+		assert.match(guidance, /hc templates/);
+		assert.match(guidance, /hc run --bg --name/);
+		assert.match(guidance, /never use `pi -p`/);
+		assert.match(guidance, /hc wait --children/);
+		assert.match(guidance, /disjoint files or separate worktrees/);
+		assert.match(guidance, /Main remains responsible for tests and integration/);
+		assert.doesNotMatch(guidance, /delegate_task|delegate_start|Use teleport/);
+	});
 });
 
-test("inactive tools receive no routing section", () => {
-	const { handler, event } = setup(["read", "bash", "sudo_task"]);
-	handler(event);
-	assert.equal(Object.hasOwn(event.systemPromptOptions.sections, section), false);
+test("codemode alone also receives hc guidance", () => {
+	withHc("t1", () => {
+		const { handler, event } = setup(["codemode"]);
+		handler(event);
+		assert.match(event.systemPromptOptions.sections[section], /hc run --bg/);
+	});
 });
 
-test("teleport guidance is independently conditional and keeps ownership distinct", () => {
-	const { handler, event } = setup(["read", "teleport"]);
-	handler(event);
-	const guidance = event.systemPromptOptions.sections[section];
-	assert.match(guidance, /Use teleport when continuing work/);
-	assert.match(guidance, /not merely to read an external file/);
-	assert.match(guidance, /do not move Main into subagent-owned worktrees/);
-	assert.doesNotMatch(guidance, /Use delegate_task/);
+test("outside hc or without a shell route there is no delegation section", () => {
+	withHc(undefined, () => {
+		const { handler, event } = setup(["read", "bash", "sudo_task"]);
+		handler(event);
+		assert.equal(Object.hasOwn(event.systemPromptOptions.sections, section), false);
+	});
+	withHc("t1", () => {
+		const { handler, event } = setup(["read"]);
+		handler(event);
+		assert.equal(Object.hasOwn(event.systemPromptOptions.sections, section), false);
+	});
 });
 
-test("repeated invocations replace the owned section without duplicate rules", () => {
-	const { handler, event } = setup(["delegate_task", "teleport"]);
-	handler(event);
-	const first = event.systemPromptOptions.sections[section];
-	handler(event);
-	assert.equal(event.systemPromptOptions.sections[section], first);
-	assert.equal(first.match(/Use delegate_task proactively/g).length, 1);
-	assert.equal(first.match(/Use teleport when continuing work/g).length, 1);
+test("teleport guidance is independently conditional", () => {
+	withHc(undefined, () => {
+		const { handler, event } = setup(["read", "teleport"]);
+		handler(event);
+		const guidance = event.systemPromptOptions.sections[section];
+		assert.match(guidance, /Use teleport when continuing work/);
+		assert.match(guidance, /not merely to read an external file/);
+		assert.doesNotMatch(guidance, /hc run/);
+	});
 });
 
-test("tool selection changes remove stale guidance without affecting other sections", () => {
-	const { handler, event } = setup(["delegate_task", "teleport"], { project_policy: "Keep this" });
-	handler(event);
-	event.systemPromptOptions.selectedTools = ["teleport"];
-	handler(event);
-	assert.doesNotMatch(event.systemPromptOptions.sections[section], /Use delegate_task/);
-	event.systemPromptOptions.selectedTools = ["read"];
-	handler(event);
-	assert.deepEqual(event.systemPromptOptions.sections, { project_policy: "Keep this" });
+test("repeated invocations replace the owned section without duplicates or touching other sections", () => {
+	withHc("t1", () => {
+		const { handler, event } = setup(["bash", "teleport"], { project_policy: "Keep this" });
+		handler(event);
+		const first = event.systemPromptOptions.sections[section];
+		handler(event);
+		assert.equal(event.systemPromptOptions.sections[section], first);
+		assert.equal(first.match(/hc run --bg --name/g).length, 1);
+		event.systemPromptOptions.selectedTools = ["read"];
+		handler(event);
+		assert.deepEqual(event.systemPromptOptions.sections, { project_policy: "Keep this" });
+	});
 });
 
 test("routing preserves the prompt, tool definitions, selection, and other instructions", () => {
-	const { handler, event } = setup(["delegate_task"], { project_policy: "Keep this" });
-	const { sections, ...otherOptions } = structuredClone(event.systemPromptOptions);
-	assert.equal(handler(event), undefined);
-	const { sections: afterSections, ...afterOptions } = event.systemPromptOptions;
-	assert.deepEqual(afterOptions, otherOptions);
-	assert.equal(afterSections.project_policy, sections.project_policy);
-	assert.equal(event.systemPrompt, "Existing system prompt");
-});
-
-test("active background delegation explicitly permits conditional parallel fan-out", () => {
-	const { handler, event } = setup(["read", "delegate", "delegate_start", "delegate_result", "delegate_cancel"]);
-	handler(event);
-	const guidance = event.systemPromptOptions.sections[section];
-	assert.match(guidance, /authorized work splits into independent subtasks/);
-	assert.match(guidance, /multiple background agents in parallel/);
-	assert.match(guidance, /several delegate_start calls in one turn/);
-	assert.match(guidance, /taskId immediately without waiting for the others or their answers/);
-	assert.match(guidance, /advertised concurrency cap/);
-	assert.match(guidance, /avoid unnecessary paid fan-out/);
-	assert.match(guidance, /respect requests not to delegate/);
-	assert.match(guidance, /foreground delegate when you need its answer before continuing/);
-	assert.match(guidance, /disjoint files or separate worktrees/);
-	assert.match(guidance, /Main remains responsible for tests and integration/);
-	assert.match(guidance, /terminal delegate_result once after/);
-	assert.match(guidance, /rather than polling or sleeping/);
-	assert.match(guidance, /statusline/);
-	assert.doesNotMatch(guidance, /delegate_task|pi-subagent skill|mode isolated|Use teleport/);
-});
-
-test("background routing mentions only available companion tools and removes stale rules", () => {
-	const { handler, event } = setup(["delegate_start"], { project_policy: "Keep this" });
-	handler(event);
-	assert.match(event.systemPromptOptions.sections[section], /multiple background agents/);
-	assert.doesNotMatch(event.systemPromptOptions.sections[section], /foreground delegate|delegate_result/);
-	const first = event.systemPromptOptions.sections[section];
-	handler(event);
-	assert.equal(event.systemPromptOptions.sections[section], first);
-	event.systemPromptOptions.selectedTools = ["teleport"];
-	handler(event);
-	assert.doesNotMatch(event.systemPromptOptions.sections[section], /delegate_start/);
-	assert.match(event.systemPromptOptions.sections[section], /Use teleport/);
-	event.systemPromptOptions.selectedTools = ["read"];
-	handler(event);
-	assert.deepEqual(event.systemPromptOptions.sections, { project_policy: "Keep this" });
-});
-
-test("background, legacy, and teleport routing coexist without duplicate fan-out rules", () => {
-	const { handler, event } = setup(["delegate_start", "delegate_result", "delegate_task", "teleport"]);
-	handler(event);
-	handler(event);
-	const guidance = event.systemPromptOptions.sections[section];
-	assert.equal(guidance.match(/multiple background agents in parallel/g).length, 1);
-	assert.match(guidance, /Use delegate_task proactively/);
-	assert.match(guidance, /Use teleport when continuing work/);
+	withHc("t1", () => {
+		const { handler, event } = setup(["bash"], { project_policy: "Keep this" });
+		const { sections, ...otherOptions } = structuredClone(event.systemPromptOptions);
+		assert.equal(handler(event), undefined);
+		const { sections: afterSections, ...afterOptions } = event.systemPromptOptions;
+		assert.deepEqual(afterOptions, otherOptions);
+		assert.equal(afterSections.project_policy, sections.project_policy);
+		assert.equal(event.systemPrompt, "Existing system prompt");
+	});
 });
 
 test("older Pi events without structured options are a safe no-op", () => {

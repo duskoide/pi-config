@@ -5,7 +5,6 @@ import { tmpdir } from "node:os";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
-import { inspectDelegatorConfig } from "./check-pi-delegator.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_SETTINGS = join(REPO_ROOT, ".pi", "agent", "settings.json");
@@ -19,10 +18,8 @@ const ROLE_TOOL_REQUIREMENTS = {
 };
 const EXACT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 const NPM_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-9._-]*)$/;
-const REQUIRED_PACKAGE_VERSIONS = new Map([
-	["pi-background-tasks", "2.5.0"],
-	["@xynogen/pix-pretty", "1.22.0"],
-]);
+// No package is mandatory; add [name, version] pairs here to require a pin.
+const REQUIRED_PACKAGE_VERSIONS = new Map([]);
 const MARKER = "PI_CONFIG_HEALTH_OK";
 
 function readJson(path, errors) {
@@ -96,7 +93,6 @@ function parseFrontmatter(text) {
 function inspectConfig({
 	settingsPath = DEFAULT_SETTINGS,
 	agentsDir = DEFAULT_AGENTS,
-	delegatorPath = join(dirname(settingsPath), "pi-delegator.json"),
 } = {}) {
 	const errors = [];
 	const warnings = [];
@@ -150,13 +146,6 @@ function inspectConfig({
 	const malformedPackageEntries = packages.filter((entry) => !packageSource(entry));
 	if (malformedPackageEntries.length) errors.push(`package entries must be strings or objects with a string source (found ${malformedPackageEntries.length})`);
 	const packageSources = packages.map(packageSource).filter(Boolean);
-	const delegatorConfigured = packageSources.some((source) => rawNpmName(source) === "@mostlyworks/pi-delegator");
-	let delegator;
-	if (delegatorConfigured || existsSync(delegatorPath)) {
-		delegator = inspectDelegatorConfig({ configPath: delegatorPath });
-		errors.push(...delegator.errors);
-		if (!delegatorConfigured) warnings.push("pi-delegator.json exists but @mostlyworks/pi-delegator is not configured in packages");
-	}
 	const floatingPackages = packageSources.filter((source) => source.startsWith("npm:") && !isPinnedNpm(source));
 	if (floatingPackages.length) warnings.push(`unpinned npm packages: ${floatingPackages.join(", ")}`);
 	const parsedPackages = packageSources.map(parseNpmSpec).filter(Boolean);
@@ -184,9 +173,9 @@ function inspectConfig({
 	const backgroundExtensions = backgroundPackage && Array.isArray(backgroundPackage.extensions)
 		? backgroundPackage.extensions
 		: undefined;
-	if (backgroundPackages.length !== 1) {
-		errors.push(`exactly one pinned pi-background-tasks package is required (found ${backgroundPackages.length})`);
-	} else {
+	if (backgroundPackages.length > 1) {
+		errors.push(`at most one pi-background-tasks package is allowed (found ${backgroundPackages.length})`);
+	} else if (backgroundPackages.length === 1) {
 		if (!Array.isArray(backgroundPackage.extensions)) {
 			errors.push("pi-background-tasks extensions must be an array");
 		} else if (backgroundExtensions.length !== 1 || backgroundExtensions[0] !== "extensions/background-tasks.ts") {
@@ -236,7 +225,6 @@ function inspectConfig({
 			defaultProjectTrust: settings.defaultProjectTrust ?? null,
 			packageCount: packages.length,
 			floatingPackages,
-			delegator: delegator ? { configured: delegatorConfigured, ...delegator.checks } : null,
 			roles,
 		},
 	};
@@ -452,7 +440,6 @@ async function main(argv) {
 		console.log(`Pi config health: ${report.ok && (!live || report.liveDefault.ok) ? "PASS" : "FAIL"}`);
 		console.log(`  default: ${report.checks.defaultRoute} (${report.checks.defaultThinkingLevel ?? "unspecified"})`);
 		console.log(`  packages: ${report.checks.packageCount}; floating: ${report.checks.floatingPackages.length}`);
-		if (report.checks.delegator) console.log(`  delegator profiles: ${report.checks.delegator.enabledProfiles.join(", ") || "none"}${report.checks.delegator.configured ? "" : " (package not configured)"}`);
 		for (const [role, details] of Object.entries(report.checks.roles)) console.log(`  ${role}: ${details.model}`);
 		for (const warning of report.warnings) console.log(`WARN: ${warning}`);
 		for (const error of report.errors) console.log(`ERROR: ${error}`);

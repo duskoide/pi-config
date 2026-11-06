@@ -1,25 +1,13 @@
 {
-  "lastChangelogVersion": "1.4.0",
-  "theme": "dark",
+  "lastChangelogVersion": "1.5.0",
+  "theme": "noctalia",
   "packages": [
-    "npm:@pi-archimedes/image-paste@2.5.1",
-    "npm:pi-antigravity@0.7.2",
+    "npm:@pi-archimedes/image-paste",
     "npm:@ff-labs/pi-fff@0.10.6",
     "npm:pi-undo-redo@0.1.1",
-    "npm:pi-herdr-sudo-task@0.1.5",
-    "npm:@hk_net/pi-usage-bars@0.6.0",
-    "npm:@juicesharp/rpiv-btw@2.9.0",
-    "npm:pi-commandcode-provider@0.6.4",
+    "npm:@hk_net/pi-usage-bars",
+    "npm:@juicesharp/rpiv-btw",
     "./pi-config",
-    {
-      "source": "npm:pi-background-tasks@latest",
-      "extensions": [
-        "extensions/background-tasks.ts"
-      ]
-    },
-    "npm:pi-provider-qoder",
-    "npm:@mostlyworks/pi-delegator@0.6.6",
-    "npm:@gotgenes/pi-anthropic-auth",
     "npm:pi-advisor-flow",
     "npm:@zhushanwen/pi-ask-user",
     "npm:@tintinweb/pi-tasks",
@@ -27,11 +15,12 @@
     "npm:pi-cache-optimizer",
     "npm:pi-powerline-footer",
     "npm:@monotykamary/pi-vcc",
-    "git:github.com/duskoide/pi-profiles"
+    "git:github.com/duskoide/pi-profiles",
+    "https://github.com/earendil-works/pi-claude-code"
   ],
-  "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-flash",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-5-5",
+  "defaultThinkingLevel": "medium",
   "defaultTools": [
     "+codemode"
   ],
@@ -41,13 +30,10 @@
   "defaultProjectTrust": "always",
   "quietStartup": true,
   "enabledModels": [
-    "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-opus-5-5",
-    "anthropic/claude-haiku-5-5",
-    "llama.cpp/flint-apex",
     "deepseek/deepseek-flash",
-    "moonshotai/kimi-k3.1-pro",
-    "llama.cpp/cyber-tiel"
+    "claude-code/claude-opus-5-5",
+    "claude-code/claude-sonnet-5-5",
+    "claude-code/claude-haiku-5-5"
   ],
   "tuiMode": "fullscreen",
   "fullscreenCopyOnSelect": true,
@@ -93,10 +79,18 @@
   "modelThinkingLevels": {
     "anthropic/claude-sonnet-5-5": "medium",
     "anthropic/claude-haiku-5-5": "high",
-    "anthropic/claude-opus-5-5": "low",
-    "deepseek/deepseek-flash": "max"
+    "anthropic/claude-opus-5-5": "medium",
+    "deepseek/deepseek-flash": "high"
   },
   "codemode": {
-    "mode": "only"
+    "mode": "on"
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:@hk_net/pi-usage-bars\",\"scope\":\"user\"}": "0.7.1",
+    "{\"source\":\"npm:@gotgenes/pi-anthropic-auth\",\"scope\":\"user\"}": "3.4.4",
+    "{\"source\":\"npm:pi-advisor-flow\",\"scope\":\"user\"}": "0.14.4",
+    "{\"source\":\"npm:@tintinweb/pi-tasks\",\"scope\":\"user\"}": "0.9.1",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-powerline-footer\",\"scope\":\"user\"}": "0.22.0"
   }
 }
